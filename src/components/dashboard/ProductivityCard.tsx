@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResponsiveContainer, PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, Legend, Tooltip as RechartsTooltip } from 'recharts';
 
 // Sample data
 const productivityData = [
@@ -35,7 +35,7 @@ export default function ProductivityCard() {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
+              <RechartsTooltip 
                 formatter={(value) => [`${value}%`, 'Porcentagem']}
                 contentStyle={{ 
                   borderRadius: '8px', 
