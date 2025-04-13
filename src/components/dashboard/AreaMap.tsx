@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { Icon } from 'leaflet';
+import L from 'leaflet';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AreaMarker } from '@/types';
 import 'leaflet/dist/leaflet.css';
@@ -36,7 +36,7 @@ const sampleMarkers: AreaMarker[] = [
 ];
 
 // Custom marker icon
-const customIcon = new Icon({
+const DefaultIcon = L.icon({
   iconUrl: icon,
   shadowUrl: iconShadow,
   iconSize: [25, 41],
@@ -98,7 +98,7 @@ export default function AreaMap() {
             <Marker 
               key={marker.id} 
               position={marker.position}
-              icon={customIcon}
+              icon={DefaultIcon}
             >
               <Popup>
                 <div className="p-1">
