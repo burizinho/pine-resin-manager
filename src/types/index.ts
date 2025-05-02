@@ -1,4 +1,3 @@
-
 // User related types
 export interface User {
   id: string;
@@ -78,6 +77,10 @@ export interface AreaMarker {
   position: [number, number];
   size: number;
   status: string;
+  treeCount?: number;
+  pineType?: string;
+  plantingDate?: string;
+  productivity?: number;
 }
 
 export interface AuthState {

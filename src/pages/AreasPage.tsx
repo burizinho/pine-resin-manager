@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AreaMapView from "@/components/areas/AreaMapView";
 
 export default function AreasPage() {
   return (
@@ -27,14 +28,7 @@ export default function AreasPage() {
           <TabsTrigger value="lista">Lista</TabsTrigger>
         </TabsList>
         <TabsContent value="mapa" className="space-y-4">
-          <div className="relative w-full h-[60vh] rounded-lg overflow-hidden border bg-card shadow-sm">
-            <div className="absolute inset-0 flex items-center justify-center bg-muted">
-              <MapPin className="h-12 w-12 text-muted-foreground/50" />
-              <p className="ml-2 text-lg text-muted-foreground">
-                Visualização do mapa das áreas
-              </p>
-            </div>
-          </div>
+          <AreaMapView />
         </TabsContent>
         <TabsContent value="lista" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
