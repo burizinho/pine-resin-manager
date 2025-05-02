@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -127,7 +126,7 @@ export default function ExtractionsPage() {
     const newExtraction: Extraction = {
       ...data,
       id: `${extractions.length + 1}`,
-      date: data.date.toISOString().split('T')[0],
+      date: data.date as string,
       createdAt: new Date().toISOString(),
     };
     
