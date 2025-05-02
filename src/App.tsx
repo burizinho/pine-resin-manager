@@ -9,6 +9,11 @@ import Dashboard from "./pages/Dashboard";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import NotFound from "./pages/NotFound";
+import AreasPage from "./pages/AreasPage";
+import ExtractionsPage from "./pages/ExtractionsPage";
+import FinancesPage from "./pages/FinancesPage";
+import ReportsPage from "./pages/ReportsPage";
+import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +47,46 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/areas" 
+              element={
+                <ProtectedRoute>
+                  <AreasPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/extractions" 
+              element={
+                <ProtectedRoute>
+                  <ExtractionsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/finances" 
+              element={
+                <ProtectedRoute>
+                  <FinancesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/reports" 
+              element={
+                <ProtectedRoute>
+                  <ReportsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <ProtectedRoute>
+                  <SettingsPage />
                 </ProtectedRoute>
               } 
             />
