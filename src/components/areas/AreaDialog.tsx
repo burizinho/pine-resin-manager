@@ -12,7 +12,7 @@ import { AreaForm } from "@/components/forms/AreaForm";
 interface AreaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  area?: Area;
+  area?: Area | null;
   onSave: (data: any) => void;
 }
 
@@ -34,7 +34,7 @@ export function AreaDialog({
           </DialogDescription>
         </DialogHeader>
         <AreaForm
-          area={area}
+          area={area || undefined}
           onSubmit={(data) => {
             onSave(data);
             onOpenChange(false);

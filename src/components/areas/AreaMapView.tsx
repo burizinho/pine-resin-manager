@@ -57,9 +57,10 @@ function MapBounds() {
 // Define props interface for AreaMapView component
 interface AreaMapViewProps {
   areas: Area[];
+  onAreaClick?: (area: Area) => void;
 }
 
-export default function AreaMapView({ areas = [] }: AreaMapViewProps) {
+export default function AreaMapView({ areas = [], onAreaClick }: AreaMapViewProps) {
   const [markers, setMarkers] = useState<AreaMarker[]>([]);
   const [filteredMarkers, setFilteredMarkers] = useState<AreaMarker[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -96,6 +97,11 @@ export default function AreaMapView({ areas = [] }: AreaMapViewProps) {
     
     setFilteredMarkers(filtered);
   }, [selectedStatus, selectedType, markers]);
+
+  // Find original area from marker
+  const findAreaById = (id: string): Area | undefined => {
+    return areas.find(area => area.id === id);
+  };
 
   // Extract unique pine types
   const pineTypes = Array.from(new Set(markers.map(marker => marker.pineType).filter(Boolean)));
@@ -190,7 +196,15 @@ export default function AreaMapView({ areas = [] }: AreaMapViewProps) {
                         )}
                       </div>
                       <div className="mt-3 flex justify-end">
-                        <Button variant="outline" size="sm" className="w-full">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full" 
+                          onClick={() => {
+                            const area = findAreaById(marker.id);
+                            if (area && onAreaClick) onAreaClick(area);
+                          }}
+                        >
                           <ExternalLink className="mr-2 h-4 w-4" /> Ver detalhes
                         </Button>
                       </div>
