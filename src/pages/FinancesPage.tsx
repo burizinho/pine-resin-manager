@@ -3,7 +3,11 @@ import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Download, Plus, TrendingDown, TrendingUp } from "lucide-react";
+import { Download, Plus } from "lucide-react";
+import RevenueExpenseChart from "@/components/finances/RevenueExpenseChart";
+import ExpensesPieChart from "@/components/finances/ExpensesPieChart";
+import ForecastChart from "@/components/finances/ForecastChart";
+import FinancialKpis from "@/components/finances/FinancialKpis";
 
 export default function FinancesPage() {
   return (
@@ -27,59 +31,7 @@ export default function FinancesPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Receita Total</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">R$ 138.500,00</div>
-            <div className="flex items-center mt-1 text-xs text-green-600">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              <span>+12% em relação ao ano anterior</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Despesas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">R$ 52.430,00</div>
-            <div className="flex items-center mt-1 text-xs text-red-600">
-              <TrendingDown className="h-3 w-3 mr-1" />
-              <span>+8% em relação ao ano anterior</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Resultado</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">R$ 86.070,00</div>
-            <div className="flex items-center mt-1 text-xs text-green-600">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              <span>+15% em relação ao ano anterior</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">Preço Médio</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">R$ 56,53/kg</div>
-            <div className="flex items-center mt-1 text-xs text-green-600">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              <span>+5% em relação ao ano anterior</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <FinancialKpis />
 
       <Tabs defaultValue="transacoes" className="w-full">
         <TabsList className="mb-4">
@@ -151,53 +103,13 @@ export default function FinancesPage() {
         
         <TabsContent value="relatorios" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Receitas x Despesas</CardTitle>
-                <CardDescription>Comparativo dos últimos 12 meses</CardDescription>
-              </CardHeader>
-              <CardContent className="h-[300px] flex items-center justify-center">
-                <div className="text-center">
-                  <DollarSign className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <p className="mt-2 text-muted-foreground">
-                    Gráfico de receitas vs despesas por mês
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Distribuição de Despesas</CardTitle>
-                <CardDescription>Por categoria</CardDescription>
-              </CardHeader>
-              <CardContent className="h-[300px] flex items-center justify-center">
-                <div className="text-center">
-                  <DollarSign className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <p className="mt-2 text-muted-foreground">
-                    Gráfico de pizza com distribuição de despesas
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <RevenueExpenseChart />
+            <ExpensesPieChart />
           </div>
         </TabsContent>
         
         <TabsContent value="previsoes" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Projeção Financeira</CardTitle>
-              <CardDescription>Previsão para os próximos 12 meses</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <DollarSign className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <p className="mt-2 text-muted-foreground">
-                  Gráfico de projeção financeira para os próximos meses
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <ForecastChart />
         </TabsContent>
       </Tabs>
     </MainLayout>
