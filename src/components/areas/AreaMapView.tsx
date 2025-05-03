@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Layers, MapPin, Filter, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AreaMarker } from '@/types';
+import { Area, AreaMarker } from '@/types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -54,76 +54,34 @@ function MapBounds() {
   return null;
 }
 
-// Sample data for demonstration
-const sampleMarkers: AreaMarker[] = [
-  {
-    id: '1',
-    name: 'Talhão 1',
-    position: [-23.5505, -46.6333], // São Paulo
-    size: 15,
-    status: 'extracao',
-    treeCount: 1500,
-    pineType: 'Pinus Elliottii',
-    plantingDate: '2012-04-15',
-    productivity: 3.8
-  },
-  {
-    id: '2',
-    name: 'Talhão 2',
-    position: [-22.9068, -43.1729], // Rio de Janeiro
-    size: 20,
-    status: 'crescimento',
-    treeCount: 2000,
-    pineType: 'Pinus Taeda',
-    plantingDate: '2015-06-23',
-    productivity: 3.2
-  },
-  {
-    id: '3',
-    name: 'Talhão 3',
-    position: [-25.4284, -49.2733], // Curitiba
-    size: 10,
-    status: 'plantio',
-    treeCount: 1000,
-    pineType: 'Pinus Caribaea',
-    plantingDate: '2022-03-10',
-    productivity: 0
-  },
-  {
-    id: '4',
-    name: 'Talhão 4',
-    position: [-20.8137, -49.3823], // São José do Rio Preto
-    size: 25,
-    status: 'colheita',
-    treeCount: 2500,
-    pineType: 'Pinus Elliottii',
-    plantingDate: '2010-09-03',
-    productivity: 4.2
-  },
-  {
-    id: '5',
-    name: 'Talhão 5',
-    position: [-23.4209, -51.9331], // Maringá
-    size: 18,
-    status: 'extracao',
-    treeCount: 1800,
-    pineType: 'Pinus Taeda',
-    plantingDate: '2013-11-15',
-    productivity: 3.5
-  }
-];
+// Define props interface for AreaMapView component
+interface AreaMapViewProps {
+  areas: Area[];
+}
 
-export default function AreaMapView() {
+export default function AreaMapView({ areas = [] }: AreaMapViewProps) {
   const [markers, setMarkers] = useState<AreaMarker[]>([]);
   const [filteredMarkers, setFilteredMarkers] = useState<AreaMarker[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
   
   useEffect(() => {
-    // Em um app real, buscar marcadores de uma API
-    setMarkers(sampleMarkers);
-    setFilteredMarkers(sampleMarkers);
-  }, []);
+    // Transform the Area[] into AreaMarker[]
+    const transformedMarkers: AreaMarker[] = areas.map(area => ({
+      id: area.id,
+      name: area.name,
+      position: [area.latitude, area.longitude] as [number, number],
+      size: area.size,
+      status: area.status,
+      treeCount: area.treeCount,
+      pineType: area.pineType,
+      plantingDate: area.plantingDate,
+      productivity: 0, // Default value as we don't have this in Area type
+    }));
+    
+    setMarkers(transformedMarkers);
+    setFilteredMarkers(transformedMarkers);
+  }, [areas]);
 
   useEffect(() => {
     let filtered = [...markers];
@@ -133,14 +91,14 @@ export default function AreaMapView() {
     }
     
     if (selectedType !== "all") {
-      filtered = filtered.filter(marker => marker.pineType.includes(selectedType));
+      filtered = filtered.filter(marker => marker.pineType?.includes(selectedType));
     }
     
     setFilteredMarkers(filtered);
   }, [selectedStatus, selectedType, markers]);
 
-  // Extrair tipos de pinheiros únicos
-  const pineTypes = Array.from(new Set(markers.map(marker => marker.pineType)));
+  // Extract unique pine types
+  const pineTypes = Array.from(new Set(markers.map(marker => marker.pineType).filter(Boolean)));
 
   return (
     <div className="space-y-4">
@@ -206,7 +164,7 @@ export default function AreaMapView() {
                         
                         <p className="grid grid-cols-2 gap-x-2">
                           <span className="font-medium">Árvores:</span> 
-                          <span>{marker.treeCount.toLocaleString('pt-BR')}</span>
+                          <span>{marker.treeCount?.toLocaleString('pt-BR')}</span>
                         </p>
                         
                         <p className="grid grid-cols-2 gap-x-2">
@@ -216,15 +174,15 @@ export default function AreaMapView() {
                         
                         <p className="grid grid-cols-2 gap-x-2">
                           <span className="font-medium">Plantio:</span>
-                          <span>{new Date(marker.plantingDate).toLocaleDateString('pt-BR')}</span>
+                          <span>{marker.plantingDate ? new Date(marker.plantingDate).toLocaleDateString('pt-BR') : ''}</span>
                         </p>
                         
                         <p className="grid grid-cols-2 gap-x-2">
                           <span className="font-medium">Idade:</span>
-                          <span>{new Date().getFullYear() - new Date(marker.plantingDate).getFullYear()} anos</span>
+                          <span>{marker.plantingDate ? new Date().getFullYear() - new Date(marker.plantingDate).getFullYear() : 0} anos</span>
                         </p>
                         
-                        {marker.productivity > 0 && (
+                        {marker.productivity && marker.productivity > 0 && (
                           <p className="grid grid-cols-2 gap-x-2">
                             <span className="font-medium">Produtividade:</span>
                             <span>{marker.productivity.toFixed(1)} kg/ha</span>
@@ -290,7 +248,7 @@ export default function AreaMapView() {
                   <SelectGroup>
                     <SelectItem value="all">Todas as espécies</SelectItem>
                     {pineTypes.map((type, index) => (
-                      <SelectItem key={index} value={type}>{type}</SelectItem>
+                      <SelectItem key={index} value={type || ''}>{type}</SelectItem>
                     ))}
                   </SelectGroup>
                 </SelectContent>
@@ -314,7 +272,7 @@ export default function AreaMapView() {
                 <div className="bg-muted p-3 rounded-lg">
                   <p className="text-sm text-muted-foreground">Árvores</p>
                   <p className="text-2xl font-bold">
-                    {filteredMarkers.reduce((acc, marker) => acc + marker.treeCount, 0).toLocaleString('pt-BR')}
+                    {filteredMarkers.reduce((acc, marker) => acc + (marker.treeCount || 0), 0).toLocaleString('pt-BR')}
                   </p>
                 </div>
                 <div className="bg-muted p-3 rounded-lg">
