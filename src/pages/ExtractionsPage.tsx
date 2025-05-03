@@ -8,6 +8,8 @@ import { Area, Extraction } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { ExtractionDialog } from "@/components/extractions/ExtractionDialog";
 import { toast } from "@/hooks/use-toast";
+import { ExtractionCalendar } from "@/components/extractions/ExtractionCalendar";
+import { formatDate } from "@/lib/formatters";
 
 export default function ExtractionsPage() {
   const [open, setOpen] = useState(false);
@@ -157,6 +159,12 @@ export default function ExtractionsPage() {
     );
   };
 
+  // Create a map of area IDs to area names for the calendar
+  const areaNames = areas.reduce((acc: Record<string, string>, area) => {
+    acc[area.id] = area.name;
+    return acc;
+  }, {});
+
   return (
     <MainLayout>
       <div className="flex items-center justify-between mb-6">
@@ -230,15 +238,57 @@ export default function ExtractionsPage() {
             <CardHeader>
               <CardTitle>Calendário de Extrações</CardTitle>
             </CardHeader>
-            <CardContent className="h-[500px]">
-              <div className="flex items-center justify-center h-full">
-                <div className="flex flex-col items-center text-center">
-                  <Droplet className="h-16 w-16 text-muted-foreground/50" />
-                  <h3 className="mt-4 text-lg font-medium">Calendário de Extrações</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Aqui você poderá ver todas as extrações programadas no calendário
-                  </p>
-                </div>
+            <CardContent>
+              <ExtractionCalendar 
+                extractions={extractions} 
+                areas={areaNames} 
+              />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Próximas Extrações Agendadas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="relative w-full overflow-auto">
+                <table className="w-full caption-bottom text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="h-10 px-4 text-left align-middle font-medium">Data</th>
+                      <th className="h-10 px-4 text-left align-middle font-medium">Área</th>
+                      <th className="h-10 px-4 text-left align-middle font-medium">Equipe</th>
+                      <th className="h-10 px-4 text-right align-middle font-medium">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {extractions
+                      .filter(ext => new Date(ext.date) > new Date())
+                      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                      .slice(0, 5)
+                      .map((extraction) => (
+                        <tr key={extraction.id} className="border-b">
+                          <td className="p-2 align-middle">
+                            {formatDate(new Date(extraction.date))}
+                          </td>
+                          <td className="p-2 align-middle">
+                            {getAreaById(extraction.areaId)?.name || "Desconhecida"}
+                          </td>
+                          <td className="p-2 align-middle">{extraction.team}</td>
+                          <td className="p-2 align-middle text-right">
+                            <Button variant="ghost" size="sm">Ver</Button>
+                          </td>
+                        </tr>
+                      ))}
+                    {extractions.filter(ext => new Date(ext.date) > new Date()).length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="p-4 text-center text-muted-foreground">
+                          Nenhuma extração agendada
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>

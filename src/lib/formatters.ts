@@ -1,11 +1,11 @@
-
 // Date formatter
-export function formatDate(date: Date): string {
+export function formatDate(date: Date | string): string {
+  const dateObj = date instanceof Date ? date : new Date(date);
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric'
-  }).format(date);
+  }).format(dateObj);
 }
 
 // Currency formatter
