@@ -1,3 +1,4 @@
+
 // Date formatter
 export function formatDate(date: Date | string): string {
   const dateObj = date instanceof Date ? date : new Date(date);
@@ -37,4 +38,14 @@ export function formatWeight(kg: number): string {
 // Format date range
 export function formatDateRange(startDate: Date, endDate: Date): string {
   return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+}
+
+// Format percentage
+export function formatPercentage(value: number, decimalPlaces: number = 1): string {
+  return `${formatNumber(value, decimalPlaces)}%`;
+}
+
+// Format price per kilogram
+export function formatPricePerKg(value: number): string {
+  return `${formatCurrency(value)}/kg`;
 }
