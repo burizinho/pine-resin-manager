@@ -7,7 +7,7 @@ import ProductionChart from "@/components/reports/ProductionChart";
 import ProductivityTable from "@/components/reports/ProductivityTable";
 import QualityPieChart from "@/components/reports/QualityPieChart";
 import ComparativeChart from "@/components/reports/ComparativeChart";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { formatCurrency, formatWeight } from "@/lib/formatters";
 
 export default function ReportsPage() {

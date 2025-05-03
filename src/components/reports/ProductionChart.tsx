@@ -1,7 +1,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer } from '@/components/ui/chart';
 
 // Sample data for production visualization
 const productionData = [
@@ -43,9 +43,14 @@ export default function ProductionChart() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="month" className="text-xs" />
               <YAxis className="text-xs" />
-              <ChartTooltip>
-                <ChartTooltipContent />
-              </ChartTooltip>
+              <Tooltip 
+                formatter={(value) => [`${value} kg`, 'Quantidade']}
+                contentStyle={{
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--background)',
+                }}
+              />
               <Bar dataKey="quantidade" fill="var(--color-quantidade)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
