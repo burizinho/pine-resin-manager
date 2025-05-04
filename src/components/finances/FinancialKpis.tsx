@@ -15,13 +15,13 @@ function KpiCard({ title, value, change, icon }: KpiCardProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base font-medium flex items-center gap-2">
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
           <span className="p-1 rounded-md bg-primary/10">{icon}</span>
           <span>{title}</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-xl md:text-2xl font-bold">{value}</div>
         <div className={`flex items-center mt-1 text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
           {isPositive ? (
             <TrendingUp className="h-3 w-3 mr-1" />
@@ -37,7 +37,7 @@ function KpiCard({ title, value, change, icon }: KpiCardProps) {
 
 export default function FinancialKpis() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
       <KpiCard 
         title="Receita Total" 
         value="R$ 138.500,00" 

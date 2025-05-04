@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   MapPin, 
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NavItemProps {
   to: string;
@@ -45,7 +46,15 @@ const NavItem = ({ to, icon, label, isActive, onClick }: NavItemProps) => {
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
   
+  // Close sidebar when route changes on mobile
+  useEffect(() => {
+    if (isMobile && isOpen) {
+      setIsOpen(false);
+    }
+  }, [location.pathname, isMobile]);
+
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };

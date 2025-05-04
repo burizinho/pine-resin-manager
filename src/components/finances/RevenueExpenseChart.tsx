@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Sample data for financial visualization
 const financialData = {
@@ -28,6 +29,7 @@ type PeriodType = 'monthly' | 'quarterly' | 'yearly';
 
 export default function RevenueExpenseChart() {
   const [period, setPeriod] = useState<PeriodType>('monthly');
+  const isMobile = useIsMobile();
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -44,7 +46,7 @@ export default function RevenueExpenseChart() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <CardTitle>Receitas vs Despesas</CardTitle>
           <CardDescription>Comparativo por período</CardDescription>
@@ -63,15 +65,20 @@ export default function RevenueExpenseChart() {
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="h-[350px]">
+      <CardContent className="h-[300px] sm:h-[350px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart 
             data={financialData[period]} 
-            margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+            margin={{ 
+              top: 10, 
+              right: isMobile ? 10 : 30, 
+              left: isMobile ? -15 : 0, 
+              bottom: 5 
+            }}
           >
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis dataKey="month" className="text-xs" />
-            <YAxis className="text-xs" />
+            <YAxis className="text-xs" width={isMobile ? 30 : 50} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="receitas" name="Receitas" fill="#3c9a4e" radius={[4, 4, 0, 0]} />
             <Bar dataKey="despesas" name="Despesas" fill="#ef4444" radius={[4, 4, 0, 0]} />
