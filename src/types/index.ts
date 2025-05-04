@@ -1,3 +1,4 @@
+
 // User related types
 export interface User {
   id: string;
@@ -34,6 +35,19 @@ export interface Extraction {
 }
 
 // Financial related types
+export interface Transaction {
+  id: string;
+  type: 'receita' | 'despesa';
+  description: string;
+  category: string;
+  amount: number; // positive for income, negative for expenses
+  date: string;
+  notes?: string;
+  attachment?: string;
+  areaId?: string;
+  createdAt: string;
+}
+
 export interface Expense {
   id: string;
   userId: string;
