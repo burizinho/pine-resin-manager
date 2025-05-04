@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { DateRange } from "react-day-picker";
 
 interface TransactionFiltersProps {
   onFilterChange: (filters: {
@@ -37,10 +38,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
   const [search, setSearch] = useState("");
   const [type, setType] = useState("");
   const [category, setCategory] = useState("");
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: undefined,
     to: undefined,
   });
@@ -52,7 +50,10 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
       search,
       type,
       category,
-      dateRange,
+      dateRange: {
+        from: dateRange.from,
+        to: dateRange.to,
+      },
       minAmount,
       maxAmount,
     });
@@ -132,7 +133,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
               <Calendar
                 mode="range"
                 selected={dateRange}
-                onSelect={setDateRange}
+                onSelect={(range) => range && setDateRange(range)}
                 initialFocus
               />
             </PopoverContent>

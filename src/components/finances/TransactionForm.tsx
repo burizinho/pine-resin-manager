@@ -96,6 +96,7 @@ export function TransactionForm({ transaction, onSubmit, onCancel }: Transaction
     onSubmit({
       ...values,
       amount: finalAmount,
+      date: values.date.toISOString(), // Convert Date to ISO string
       id: transaction?.id,
     });
   }
@@ -163,6 +164,7 @@ export function TransactionForm({ transaction, onSubmit, onCancel }: Transaction
                       selected={field.value}
                       onSelect={field.onChange}
                       initialFocus
+                      className="pointer-events-auto"
                     />
                   </PopoverContent>
                 </Popover>
