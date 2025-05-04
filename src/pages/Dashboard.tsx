@@ -9,6 +9,8 @@ import ProductivityCard from '@/components/dashboard/ProductivityCard';
 import { MapPin, TreePine, Droplet, DollarSign } from 'lucide-react';
 import { DashboardStats } from '@/types';
 import { formatCurrency, formatWeight, formatArea } from '@/lib/formatters';
+import { Button } from '@/components/ui/button';
+import { useDemoNotifications } from '@/utils/demoNotifications';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats>({
@@ -18,6 +20,8 @@ export default function Dashboard() {
     monthlyRevenue: 0,
     monthlyExpenses: 0
   });
+  
+  const { addDemoNotifications } = useDemoNotifications();
 
   useEffect(() => {
     // In a real app, fetch stats from an API
@@ -34,7 +38,12 @@ export default function Dashboard() {
   return (
     <MainLayout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <Button onClick={addDemoNotifications}>
+            Demonstrar Notificações
+          </Button>
+        </div>
         
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,7 +1,8 @@
 
-import { Bell, Moon, Sun } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
+import NotificationMenu from '@/components/notifications/NotificationMenu';
 
 export default function Header() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -29,10 +30,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-end gap-4 border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <Button variant="ghost" size="icon" className="relative">
-        <Bell className="h-5 w-5" />
-        <span className="absolute top-1 right-1 flex h-2 w-2 rounded-full bg-destructive"></span>
-      </Button>
+      <NotificationMenu />
       <Button variant="ghost" size="icon" onClick={toggleTheme}>
         {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
       </Button>
