@@ -103,7 +103,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
   };
 
   const handleClearFilters = () => {
-    const newFilters = {
+    const newFilters: FiltersType = {
       search: '',
       type: '',
       category: '',
