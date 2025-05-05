@@ -6,7 +6,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Download, Plus } from "lucide-react";
+import { Download, Plus, WalletCards } from "lucide-react";
 import RevenueExpenseChart from "@/components/finances/RevenueExpenseChart";
 import ExpensesPieChart from "@/components/finances/ExpensesPieChart";
 import ForecastChart from "@/components/finances/ForecastChart";
@@ -16,6 +16,7 @@ import { TransactionFilters } from "@/components/finances/TransactionFilters";
 import { TransactionsTable } from "@/components/finances/TransactionsTable";
 import { DeleteTransactionDialog } from "@/components/finances/DeleteTransactionDialog";
 import { Transaction } from "@/types";
+import { animate } from "@/lib/animations";
 
 // Sample transaction data
 const sampleTransactions: Transaction[] = [
@@ -148,84 +149,86 @@ export default function FinancesPage() {
 
   const handleExport = () => {
     toast.success("Exportação iniciada. O arquivo será baixado em breve.");
-    // In a real application, this would trigger an actual export process
+    // Em uma aplicação real, isso iniciaria um processo de exportação
   };
 
   return (
     <MainLayout>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Finanças</h1>
-          <p className="text-muted-foreground">
-            Acompanhe receitas, despesas e resultados financeiros
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="gap-1" onClick={handleExport}>
-            <Download size={18} />
-            <span>Exportar</span>
-          </Button>
-          <Button className="gap-1" onClick={handleAddTransaction}>
-            <Plus size={18} />
-            <span>Nova Transação</span>
-          </Button>
-        </div>
-      </div>
-
-      <FinancialKpis />
-
-      <Tabs defaultValue="transacoes" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="transacoes">Transações</TabsTrigger>
-          <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
-          <TabsTrigger value="previsoes">Previsões</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="transacoes" className="space-y-4">
-          <TransactionFilters onFilterChange={handleFilterChange} />
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Transações</CardTitle>
-              <CardDescription>Gerencie suas receitas e despesas</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TransactionsTable 
-                transactions={filteredTransactions}
-                onEditTransaction={handleEditTransaction}
-                onDeleteTransaction={handleDeleteTransaction}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="relatorios" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <RevenueExpenseChart />
-            <ExpensesPieChart />
+      <div className={animate({ variant: "fade-in", className: "space-y-6" })}>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Finanças</h1>
+            <p className="text-muted-foreground">
+              Acompanhe receitas, despesas e resultados financeiros
+            </p>
           </div>
-        </TabsContent>
+          <div className="flex gap-2">
+            <Button variant="outline" className="gap-1" onClick={handleExport}>
+              <Download size={18} />
+              <span>Exportar</span>
+            </Button>
+            <Button className="gap-1" onClick={handleAddTransaction}>
+              <Plus size={18} />
+              <span>Nova Transação</span>
+            </Button>
+          </div>
+        </div>
+
+        <FinancialKpis />
+
+        <Tabs defaultValue="transacoes" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="transacoes">Transações</TabsTrigger>
+            <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
+            <TabsTrigger value="previsoes">Previsões</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="transacoes" className="space-y-4">
+            <TransactionFilters onFilterChange={handleFilterChange} />
+            
+            <Card className={animate({ variant: "scale-in", delay: "delay-200" })}>
+              <CardHeader>
+                <CardTitle>Transações</CardTitle>
+                <CardDescription>Gerencie suas receitas e despesas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TransactionsTable 
+                  transactions={filteredTransactions}
+                  onEditTransaction={handleEditTransaction}
+                  onDeleteTransaction={handleDeleteTransaction}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="relatorios" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <RevenueExpenseChart />
+              <ExpensesPieChart />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="previsoes" className="space-y-4">
+            <ForecastChart />
+          </TabsContent>
+        </Tabs>
         
-        <TabsContent value="previsoes" className="space-y-4">
-          <ForecastChart />
-        </TabsContent>
-      </Tabs>
-      
-      {/* Transaction Dialog */}
-      <TransactionDialog 
-        open={isAddingTransaction} 
-        onOpenChange={setIsAddingTransaction}
-        transaction={currentTransaction}
-        onSave={handleSaveTransaction}
-      />
-      
-      {/* Delete Transaction Dialog */}
-      <DeleteTransactionDialog 
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        transaction={transactionToDelete}
-        onConfirm={handleConfirmDelete}
-      />
+        {/* Transaction Dialog */}
+        <TransactionDialog 
+          open={isAddingTransaction} 
+          onOpenChange={setIsAddingTransaction}
+          transaction={currentTransaction}
+          onSave={handleSaveTransaction}
+        />
+        
+        {/* Delete Transaction Dialog */}
+        <DeleteTransactionDialog 
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          transaction={transactionToDelete}
+          onConfirm={handleConfirmDelete}
+        />
+      </div>
     </MainLayout>
   );
 }

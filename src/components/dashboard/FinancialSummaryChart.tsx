@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { animate } from '@/lib/animations';
 
 // Sample data for financial chart
 const financialData = {
@@ -49,7 +50,7 @@ export default function FinancialSummaryChart() {
   };
 
   return (
-    <Card className="w-full">
+    <Card className={animate({ variant: "scale-in", delay: "delay-300", className: "w-full hover-shadow" })}>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Resumo Financeiro</CardTitle>

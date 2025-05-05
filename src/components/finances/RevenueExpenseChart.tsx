@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { animate } from '@/lib/animations';
 
 // Sample data for financial visualization
 const financialData = {
@@ -45,7 +46,7 @@ export default function RevenueExpenseChart() {
   };
 
   return (
-    <Card>
+    <Card className={animate({ variant: "scale-in", delay: "delay-100", className: "hover-shadow" })}>
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <CardTitle>Receitas vs Despesas</CardTitle>

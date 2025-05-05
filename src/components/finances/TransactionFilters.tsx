@@ -1,17 +1,7 @@
 
 import { useState } from "react";
-import { CalendarIcon, Search, X } from "lucide-react";
-import { format } from "date-fns";
-
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -19,221 +9,195 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { DateRange } from "react-day-picker";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { animate } from "@/lib/animations";
+
+type FiltersType = {
+  search: string;
+  type: 'receita' | 'despesa' | '';
+  category: string;
+  dateRange: {
+    from?: Date;
+    to?: Date;
+  };
+  minAmount?: number;
+  maxAmount?: number;
+};
 
 interface TransactionFiltersProps {
-  onFilterChange: (filters: {
-    search: string;
-    type: string;
-    category: string;
-    dateRange: { from: Date | undefined; to: Date | undefined };
-    minAmount: number | undefined;
-    maxAmount: number | undefined;
-  }) => void;
+  onFilterChange: (filters: FiltersType) => void;
 }
 
+const expenseCategories = [
+  "Mão de obra",
+  "Manutenção",
+  "Insumos",
+  "Equipamentos",
+  "Administrativo",
+  "Operacional",
+  "Pessoal",
+  "Materiais",
+  "Serviços",
+  "Transporte",
+  "Outros",
+];
+
+const revenueCategories = [
+  "Vendas",
+  "Serviços",
+  "Investimentos",
+  "Outros",
+];
+
 export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) {
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState("");
-  const [category, setCategory] = useState("");
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: undefined,
-    to: undefined,
+  const [filters, setFilters] = useState<FiltersType>({
+    search: '',
+    type: '',
+    category: '',
+    dateRange: {},
+    minAmount: undefined,
+    maxAmount: undefined,
   });
-  const [minAmount, setMinAmount] = useState<number | undefined>(undefined);
-  const [maxAmount, setMaxAmount] = useState<number | undefined>(undefined);
-  
-  const applyFilters = () => {
-    onFilterChange({
-      search,
-      type,
-      category,
-      dateRange: {
-        from: dateRange.from,
-        to: dateRange.to,
-      },
-      minAmount,
-      maxAmount,
-    });
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFilters = { ...filters, search: e.target.value };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
   };
-  
-  const resetFilters = () => {
-    setSearch("");
-    setType("");
-    setCategory("");
-    setDateRange({ from: undefined, to: undefined });
-    setMinAmount(undefined);
-    setMaxAmount(undefined);
-    
-    onFilterChange({
-      search: "",
-      type: "",
-      category: "",
-      dateRange: { from: undefined, to: undefined },
+
+  const handleTypeChange = (value: 'receita' | 'despesa' | '') => {
+    // Reset category when type changes
+    const newFilters = { ...filters, type: value, category: '' };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    const newFilters = { ...filters, category: value };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
+  const handleDateRangeChange = (range: { from?: Date; to?: Date }) => {
+    const newFilters = { ...filters, dateRange: range };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
+  const handleAmountChange = (field: 'minAmount' | 'maxAmount', value: string) => {
+    const amount = value ? Number(value) : undefined;
+    const newFilters = { ...filters, [field]: amount };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    const newFilters = {
+      search: '',
+      type: '',
+      category: '',
+      dateRange: {},
       minAmount: undefined,
       maxAmount: undefined,
-    });
+    };
+    setFilters(newFilters);
+    onFilterChange(newFilters);
   };
 
-  // Count active filters for badge
-  const activeFilterCount = [
-    search, 
-    type, 
-    category, 
-    dateRange.from, 
-    dateRange.to, 
-    minAmount, 
-    maxAmount
-  ].filter(Boolean).length;
-  
-  // Generate a description of active filters for accessibility
-  const getActiveFiltersDescription = () => {
-    const filters = [];
-    if (search) filters.push(`Busca: ${search}`);
-    if (type) filters.push(`Tipo: ${type}`);
-    if (category) filters.push(`Categoria: ${category}`);
-    if (dateRange.from) filters.push(`Data inicial: ${format(dateRange.from, "dd/MM/yyyy")}`);
-    if (dateRange.to) filters.push(`Data final: ${format(dateRange.to, "dd/MM/yyyy")}`);
-    if (minAmount) filters.push(`Valor mínimo: R$ ${minAmount}`);
-    if (maxAmount) filters.push(`Valor máximo: R$ ${maxAmount}`);
-    
-    return filters.join(", ");
-  };
+  // Get categories based on selected type
+  const categories = filters.type === 'receita' 
+    ? revenueCategories 
+    : filters.type === 'despesa' 
+      ? expenseCategories
+      : [...revenueCategories, ...expenseCategories];
 
   return (
-    <div className="bg-card rounded-md border p-4 mb-4 space-y-4">
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1">
+    <Card className={animate({ variant: "slide-in", delay: "delay-100" })}>
+      <CardContent className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              type="search"
-              placeholder="Buscar transações..."
+              placeholder="Pesquisar transações..."
+              value={filters.search}
+              onChange={handleSearchChange}
               className="pl-8"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-        </div>
-        
-        <div className="flex flex-wrap gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="flex gap-1 h-10">
-                <CalendarIcon className="h-4 w-4" />
-                <span>Período</span>
-                {(dateRange.from || dateRange.to) && (
-                  <Badge variant="secondary" className="ml-1">{dateRange.from && dateRange.to ? `${format(dateRange.from, "dd/MM")} - ${format(dateRange.to, "dd/MM")}` : "Parcial"}</Badge>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="range"
-                selected={dateRange}
-                onSelect={(range) => range && setDateRange(range)}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-
-          <Select value={type} onValueChange={setType}>
-            <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="Tipo" />
+          
+          <Select
+            value={filters.type}
+            onValueChange={handleTypeChange}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Tipo de transação" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="">Todos os tipos</SelectItem>
               <SelectItem value="receita">Receitas</SelectItem>
               <SelectItem value="despesa">Despesas</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-[150px]">
+          <Select
+            value={filters.category}
+            onValueChange={handleCategoryChange}
+            disabled={categories.length === 0}
+          >
+            <SelectTrigger>
               <SelectValue placeholder="Categoria" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas</SelectItem>
-              <SelectItem value="Vendas">Vendas</SelectItem>
-              <SelectItem value="Mão de obra">Mão de obra</SelectItem>
-              <SelectItem value="Manutenção">Manutenção</SelectItem>
-              <SelectItem value="Insumos">Insumos</SelectItem>
-              <SelectItem value="Operacional">Operacional</SelectItem>
-              <SelectItem value="Administrativo">Administrativo</SelectItem>
-              <SelectItem value="Outros">Outros</SelectItem>
+              <SelectItem value="">Todas as categorias</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>{category}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="flex gap-1 h-10">
-                <span>Valor</span>
-                {(minAmount !== undefined || maxAmount !== undefined) && (
-                  <Badge variant="secondary" className="ml-1">Definido</Badge>
+              <Button variant="outline" className="justify-start text-left font-normal">
+                {filters.dateRange.from ? (
+                  filters.dateRange.to ? (
+                    <>
+                      {format(filters.dateRange.from, "dd/MM/yyyy")} -{" "}
+                      {format(filters.dateRange.to, "dd/MM/yyyy")}
+                    </>
+                  ) : (
+                    format(filters.dateRange.from, "dd/MM/yyyy")
+                  )
+                ) : (
+                  "Selecionar período"
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80" align="end">
-              <div className="grid gap-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium leading-none">Faixa de valores</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Filtre por faixa de valores
-                  </p>
-                </div>
-                <div className="grid gap-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="grid gap-1.5">
-                      <Label htmlFor="minAmount">Valor mínimo</Label>
-                      <Input 
-                        id="minAmount"
-                        type="number" 
-                        placeholder="R$ 0,00"
-                        value={minAmount || ''}
-                        onChange={(e) => setMinAmount(e.target.value ? Number(e.target.value) : undefined)}
-                      />
-                    </div>
-                    <div className="grid gap-1.5">
-                      <Label htmlFor="maxAmount">Valor máximo</Label>
-                      <Input 
-                        id="maxAmount"
-                        type="number" 
-                        placeholder="R$ 0,00"
-                        value={maxAmount || ''}
-                        onChange={(e) => setMaxAmount(e.target.value ? Number(e.target.value) : undefined)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                selected={filters.dateRange}
+                onSelect={handleDateRangeChange}
+                initialFocus
+              />
             </PopoverContent>
           </Popover>
-          
-          <div className="flex gap-2">
-            <Button variant="default" onClick={applyFilters} className="h-10">
-              Aplicar
-              {activeFilterCount > 0 && (
-                <Badge variant="secondary" className="ml-1">
-                  {activeFilterCount}
-                </Badge>
-              )}
-            </Button>
-            {activeFilterCount > 0 && (
-              <Button variant="outline" size="icon" onClick={resetFilters} title="Limpar filtros" className="h-10 w-10">
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
+
+          <Button variant="outline" onClick={handleClearFilters}>
+            Limpar filtros
+          </Button>
         </div>
-      </div>
-      
-      {activeFilterCount > 0 && (
-        <div className="text-sm text-muted-foreground">
-          <p>Filtros ativos: {getActiveFiltersDescription()}</p>
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { animate } from '@/lib/animations';
 
 // Sample data for financial forecast
 const forecastData = [
@@ -32,7 +33,7 @@ export default function ForecastChart() {
   };
 
   return (
-    <Card>
+    <Card className={animate({ variant: "scale-in", delay: "delay-100", className: "hover-shadow" })}>
       <CardHeader>
         <CardTitle>Previsão Financeira</CardTitle>
         <CardDescription>Receita realizada e projetada para os próximos 4 meses</CardDescription>

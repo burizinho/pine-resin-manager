@@ -6,40 +6,49 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { TransactionForm } from "@/components/finances/TransactionForm";
+import { TransactionForm } from "./TransactionForm";
 import { Transaction } from "@/types";
 
 interface TransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  transaction?: Transaction | null;
-  onSave: (data: Partial<Transaction>) => void;
+  transaction: Transaction | null;
+  onSave: (transaction: Partial<Transaction>) => void;
 }
 
-export function TransactionDialog({ 
-  open, 
-  onOpenChange, 
-  transaction, 
-  onSave 
+export function TransactionDialog({
+  open,
+  onOpenChange,
+  transaction,
+  onSave,
 }: TransactionDialogProps) {
+  const handleSave = (data: Partial<Transaction>) => {
+    onSave(data);
+    onOpenChange(false);
+  };
+
+  const handleCancel = () => {
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {transaction ? "Editar" : "Adicionar"} Transação
+            {transaction ? "Editar Transação" : "Nova Transação"}
           </DialogTitle>
           <DialogDescription>
-            Informe os detalhes da transação abaixo.
+            {transaction
+              ? "Atualize os detalhes da transação abaixo."
+              : "Preencha os dados para adicionar uma nova transação."}
           </DialogDescription>
         </DialogHeader>
+
         <TransactionForm
           transaction={transaction || undefined}
-          onSubmit={(data) => {
-            onSave(data);
-            onOpenChange(false);
-          }}
-          onCancel={() => onOpenChange(false)}
+          onSubmit={handleSave}
+          onCancel={handleCancel}
         />
       </DialogContent>
     </Dialog>

@@ -2,6 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, ResponsiveContainer, Cell, Tooltip, Legend } from 'recharts';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { animate } from '@/lib/animations';
 
 // Sample data for expense categories
 const expensesData = [
@@ -30,7 +31,7 @@ export default function ExpensesPieChart() {
   };
 
   return (
-    <Card>
+    <Card className={animate({ variant: "scale-in", delay: "delay-200", className: "hover-shadow" })}>
       <CardHeader>
         <CardTitle>Distribuição de Despesas</CardTitle>
         <CardDescription>Por categoria</CardDescription>

@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, DollarSign, PiggyBank } from 'lucide-react';
+import { TrendingUp, TrendingDown, WalletCards, Receipt } from 'lucide-react';
+import { animate } from '@/lib/animations';
 
 interface KpiCardProps {
   title: string;
@@ -13,7 +14,7 @@ function KpiCard({ title, value, change, icon }: KpiCardProps) {
   const isPositive = change >= 0;
   
   return (
-    <Card>
+    <Card className="hover-shadow card-transition">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <span className="p-1 rounded-md bg-primary/10">{icon}</span>
@@ -36,31 +37,39 @@ function KpiCard({ title, value, change, icon }: KpiCardProps) {
 }
 
 export default function FinancialKpis() {
+  // Gera classes de animação escalonadas para cada card
+  const cardAnimations = [
+    animate({ variant: "fade-in", delay: "delay-0" }),
+    animate({ variant: "fade-in", delay: "delay-100" }),
+    animate({ variant: "fade-in", delay: "delay-200" }),
+    animate({ variant: "fade-in", delay: "delay-300" })
+  ];
+
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-6">
       <KpiCard 
         title="Receita Total" 
         value="R$ 138.500,00" 
         change={12} 
-        icon={<DollarSign className="h-4 w-4 text-primary" />} 
+        icon={<WalletCards className="h-4 w-4 text-primary" />} 
       />
       <KpiCard 
         title="Despesas" 
         value="R$ 52.430,00" 
         change={-5} 
-        icon={<DollarSign className="h-4 w-4 text-destructive" />} 
+        icon={<Receipt className="h-4 w-4 text-destructive" />} 
       />
       <KpiCard 
         title="Resultado" 
         value="R$ 86.070,00" 
         change={15} 
-        icon={<PiggyBank className="h-4 w-4 text-primary" />} 
+        icon={<WalletCards className="h-4 w-4 text-primary" />} 
       />
       <KpiCard 
         title="Preço Médio" 
         value="R$ 56,53/kg" 
         change={5} 
-        icon={<DollarSign className="h-4 w-4 text-amber-600" />} 
+        icon={<Receipt className="h-4 w-4 text-amber-600" />} 
       />
     </div>
   );
