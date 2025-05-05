@@ -41,7 +41,7 @@ export default function Dashboard() {
 
   return (
     <MainLayout>
-      <div className={animate({ variant: "fade-in", className: "space-y-6" })}>
+      <div className={animate({ variant: "fade-in" })}>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <Button onClick={addDemoNotifications}>
@@ -50,7 +50,7 @@ export default function Dashboard() {
         </div>
         
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
           <StatsCard
             className={statCardAnimations[0]}
             title="Áreas de Plantio"
@@ -85,7 +85,7 @@ export default function Dashboard() {
         </div>
 
         {/* Map and Productivity Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className={animate({ variant: "scale-in", delay: "delay-100" })} className="lg:col-span-2">
             <AreaMap />
           </div>
@@ -100,7 +100,7 @@ export default function Dashboard() {
         </div>
 
         {/* Financial Chart */}
-        <div className="w-full">
+        <div className="w-full mt-6">
           <FinancialSummaryChart />
         </div>
       </div>

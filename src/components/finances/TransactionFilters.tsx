@@ -22,15 +22,13 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { animate } from "@/lib/animations";
+import { DateRange } from "react-day-picker";
 
 type FiltersType = {
   search: string;
   type: 'receita' | 'despesa' | '';
   category: string;
-  dateRange: {
-    from?: Date;
-    to?: Date;
-  };
+  dateRange: DateRange | undefined;
   minAmount?: number;
   maxAmount?: number;
 };
@@ -65,7 +63,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
     search: '',
     type: '',
     category: '',
-    dateRange: {},
+    dateRange: undefined,
     minAmount: undefined,
     maxAmount: undefined,
   });
@@ -89,7 +87,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
     onFilterChange(newFilters);
   };
 
-  const handleDateRangeChange = (range: { from?: Date; to?: Date }) => {
+  const handleDateRangeChange = (range: DateRange | undefined) => {
     const newFilters = { ...filters, dateRange: range };
     setFilters(newFilters);
     onFilterChange(newFilters);
@@ -107,7 +105,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
       search: '',
       type: '',
       category: '',
-      dateRange: {},
+      dateRange: undefined,
       minAmount: undefined,
       maxAmount: undefined,
     };
@@ -169,7 +167,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="justify-start text-left font-normal">
-                {filters.dateRange.from ? (
+                {filters.dateRange?.from ? (
                   filters.dateRange.to ? (
                     <>
                       {format(filters.dateRange.from, "dd/MM/yyyy")} -{" "}
@@ -189,6 +187,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
                 selected={filters.dateRange}
                 onSelect={handleDateRangeChange}
                 initialFocus
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
