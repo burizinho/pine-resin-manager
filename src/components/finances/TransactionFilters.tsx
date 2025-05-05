@@ -26,7 +26,7 @@ import { DateRange } from "react-day-picker";
 
 type FiltersType = {
   search: string;
-  type: 'receita' | 'despesa' | '';
+  type: 'receita' | 'despesa' | 'all';
   category: string;
   dateRange: DateRange | undefined;
   minAmount?: number;
@@ -61,8 +61,8 @@ const revenueCategories = [
 export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) {
   const [filters, setFilters] = useState<FiltersType>({
     search: '',
-    type: '',
-    category: '',
+    type: 'all',
+    category: 'all',
     dateRange: undefined,
     minAmount: undefined,
     maxAmount: undefined,
@@ -74,9 +74,9 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
     onFilterChange(newFilters);
   };
 
-  const handleTypeChange = (value: 'receita' | 'despesa' | '') => {
+  const handleTypeChange = (value: 'receita' | 'despesa' | 'all') => {
     // Reset category when type changes
-    const newFilters = { ...filters, type: value, category: '' };
+    const newFilters = { ...filters, type: value, category: 'all' };
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
@@ -103,8 +103,8 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
   const handleClearFilters = () => {
     const newFilters: FiltersType = {
       search: '',
-      type: '',
-      category: '',
+      type: 'all',
+      category: 'all',
       dateRange: undefined,
       minAmount: undefined,
       maxAmount: undefined,
@@ -142,7 +142,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
               <SelectValue placeholder="Tipo de transação" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os tipos</SelectItem>
+              <SelectItem value="all">Todos os tipos</SelectItem>
               <SelectItem value="receita">Receitas</SelectItem>
               <SelectItem value="despesa">Despesas</SelectItem>
             </SelectContent>
@@ -157,7 +157,7 @@ export function TransactionFilters({ onFilterChange }: TransactionFiltersProps) 
               <SelectValue placeholder="Categoria" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as categorias</SelectItem>
+              <SelectItem value="all">Todas as categorias</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}

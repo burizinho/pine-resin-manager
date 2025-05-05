@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
@@ -54,23 +53,23 @@ export default function FinancesPage() {
     }
     
     // Apply type filter
-    if (filters.type) {
+    if (filters.type && filters.type !== 'all') {
       filtered = filtered.filter(t => t.type === filters.type);
     }
     
     // Apply category filter
-    if (filters.category) {
+    if (filters.category && filters.category !== 'all') {
       filtered = filtered.filter(t => t.category === filters.category);
     }
     
     // Apply date range filter
-    if (filters.dateRange.from) {
+    if (filters.dateRange?.from) {
       const fromDate = new Date(filters.dateRange.from);
       fromDate.setHours(0, 0, 0, 0);
       filtered = filtered.filter(t => new Date(t.date) >= fromDate);
     }
     
-    if (filters.dateRange.to) {
+    if (filters.dateRange?.to) {
       const toDate = new Date(filters.dateRange.to);
       toDate.setHours(23, 59, 59, 999);
       filtered = filtered.filter(t => new Date(t.date) <= toDate);
