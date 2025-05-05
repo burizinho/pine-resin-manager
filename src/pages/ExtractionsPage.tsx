@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Droplet, Plus } from "lucide-react";
 import { Area, Extraction } from "@/types";
-import { Badge } from "@/components/ui/badge";
 import { ExtractionDialog } from "@/components/extractions/ExtractionDialog";
 import { toast } from "@/hooks/use-toast";
 import { ExtractionCalendar } from "@/components/extractions/ExtractionCalendar";
 import { formatDate } from "@/lib/formatters";
+import { ExtractionFilters } from "@/components/extractions/ExtractionFilters";
+import { DateRange } from "react-day-picker";
 
 export default function ExtractionsPage() {
   const [open, setOpen] = useState(false);
@@ -124,6 +125,8 @@ export default function ExtractionsPage() {
     },
   ]);
 
+  const [filteredExtractions, setFilteredExtractions] = useState<Extraction[]>(extractions);
+
   const handleSaveExtraction = (data: Omit<Extraction, "id" | "createdAt">) => {
     const newExtraction: Extraction = {
       ...data,
@@ -139,9 +142,70 @@ export default function ExtractionsPage() {
     });
   };
 
+  const handleFilterChange = (filters: {
+    search: string;
+    areaId: string;
+    team: string;
+    dateRange: DateRange | undefined;
+    minQuantity?: number;
+    maxQuantity?: number;
+  }) => {
+    let filtered = [...extractions];
+
+    // Apply search filter (match area name, team, or notes)
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      filtered = filtered.filter(ext => {
+        const area = getAreaById(ext.areaId);
+        return (
+          (area && area.name.toLowerCase().includes(searchTerm)) ||
+          ext.team.toLowerCase().includes(searchTerm) ||
+          (ext.notes && ext.notes.toLowerCase().includes(searchTerm))
+        );
+      });
+    }
+
+    // Apply area filter
+    if (filters.areaId && filters.areaId !== 'all') {
+      filtered = filtered.filter(ext => ext.areaId === filters.areaId);
+    }
+
+    // Apply team filter
+    if (filters.team && filters.team !== 'all') {
+      filtered = filtered.filter(ext => ext.team === filters.team);
+    }
+
+    // Apply date range filter
+    if (filters.dateRange?.from) {
+      const fromDate = new Date(filters.dateRange.from);
+      fromDate.setHours(0, 0, 0, 0);
+      filtered = filtered.filter(ext => new Date(ext.date) >= fromDate);
+    }
+
+    if (filters.dateRange?.to) {
+      const toDate = new Date(filters.dateRange.to);
+      toDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(ext => new Date(ext.date) <= toDate);
+    }
+
+    // Apply quantity filters
+    if (filters.minQuantity !== undefined) {
+      filtered = filtered.filter(ext => ext.quantity >= filters.minQuantity!);
+    }
+
+    if (filters.maxQuantity !== undefined) {
+      filtered = filtered.filter(ext => ext.quantity <= filters.maxQuantity!);
+    }
+
+    setFilteredExtractions(filtered);
+  };
+
   const getAreaById = (id: string) => {
     return areas.find((area) => area.id === id);
   };
+
+  // Extract unique teams for the filter dropdown
+  const uniqueTeams = Array.from(new Set(extractions.map(ext => ext.team)));
 
   const getStatusBadge = (index: number) => {
     const statusConfig = [
@@ -180,173 +244,189 @@ export default function ExtractionsPage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="lista" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="lista">Lista</TabsTrigger>
-          <TabsTrigger value="calendario">Calendário</TabsTrigger>
-          <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="lista" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Extrações Recentes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative w-full overflow-auto">
-                <table className="w-full caption-bottom text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="h-12 px-4 text-left align-middle font-medium">ID</th>
-                      <th className="h-12 px-4 text-left align-middle font-medium">Área</th>
-                      <th className="h-12 px-4 text-left align-middle font-medium">Data</th>
-                      <th className="h-12 px-4 text-left align-middle font-medium">Quantidade</th>
-                      <th className="h-12 px-4 text-left align-middle font-medium">Responsável</th>
-                      <th className="h-12 px-4 text-left align-middle font-medium">Status</th>
-                      <th className="h-12 px-4 text-right align-middle font-medium">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {extractions.map((extraction, i) => (
-                      <tr key={extraction.id} className="border-b">
-                        <td className="p-4 align-middle">#EXT-{1000 + i}</td>
-                        <td className="p-4 align-middle">
-                          {getAreaById(extraction.areaId)?.name || "Desconhecida"}
-                        </td>
-                        <td className="p-4 align-middle">
-                          {new Date(extraction.date).toLocaleDateString("pt-BR")}
-                        </td>
-                        <td className="p-4 align-middle">{extraction.quantity.toFixed(1)} kg</td>
-                        <td className="p-4 align-middle">{extraction.team}</td>
-                        <td className="p-4 align-middle">
-                          {getStatusBadge(i)}
-                        </td>
-                        <td className="p-4 align-middle text-right">
-                          <Button variant="ghost" size="sm">Ver</Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="calendario" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Calendário de Extrações</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ExtractionCalendar 
-                extractions={extractions} 
-                areas={areaNames} 
-              />
-            </CardContent>
-          </Card>
+      <ExtractionFilters 
+        onFilterChange={handleFilterChange} 
+        areas={areaNames} 
+        teams={uniqueTeams}
+      />
+
+      <div className="mt-6">
+        <Tabs defaultValue="lista" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="lista">Lista</TabsTrigger>
+            <TabsTrigger value="calendario">Calendário</TabsTrigger>
+            <TabsTrigger value="estatisticas">Estatísticas</TabsTrigger>
+          </TabsList>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Próximas Extrações Agendadas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="relative w-full overflow-auto">
-                <table className="w-full caption-bottom text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="h-10 px-4 text-left align-middle font-medium">Data</th>
-                      <th className="h-10 px-4 text-left align-middle font-medium">Área</th>
-                      <th className="h-10 px-4 text-left align-middle font-medium">Equipe</th>
-                      <th className="h-10 px-4 text-right align-middle font-medium">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {extractions
-                      .filter(ext => new Date(ext.date) > new Date())
-                      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                      .slice(0, 5)
-                      .map((extraction) => (
-                        <tr key={extraction.id} className="border-b">
-                          <td className="p-2 align-middle">
-                            {formatDate(new Date(extraction.date))}
-                          </td>
-                          <td className="p-2 align-middle">
-                            {getAreaById(extraction.areaId)?.name || "Desconhecida"}
-                          </td>
-                          <td className="p-2 align-middle">{extraction.team}</td>
-                          <td className="p-2 align-middle text-right">
-                            <Button variant="ghost" size="sm">Ver</Button>
+          <TabsContent value="lista" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Extrações Recentes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative w-full overflow-auto">
+                  <table className="w-full caption-bottom text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="h-12 px-4 text-left align-middle font-medium">ID</th>
+                        <th className="h-12 px-4 text-left align-middle font-medium">Área</th>
+                        <th className="h-12 px-4 text-left align-middle font-medium">Data</th>
+                        <th className="h-12 px-4 text-left align-middle font-medium">Quantidade</th>
+                        <th className="h-12 px-4 text-left align-middle font-medium">Responsável</th>
+                        <th className="h-12 px-4 text-left align-middle font-medium">Status</th>
+                        <th className="h-12 px-4 text-right align-middle font-medium">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredExtractions.length > 0 ? (
+                        filteredExtractions.map((extraction, i) => (
+                          <tr key={extraction.id} className="border-b">
+                            <td className="p-4 align-middle">#EXT-{1000 + i}</td>
+                            <td className="p-4 align-middle">
+                              {getAreaById(extraction.areaId)?.name || "Desconhecida"}
+                            </td>
+                            <td className="p-4 align-middle">
+                              {new Date(extraction.date).toLocaleDateString("pt-BR")}
+                            </td>
+                            <td className="p-4 align-middle">{extraction.quantity.toFixed(1)} kg</td>
+                            <td className="p-4 align-middle">{extraction.team}</td>
+                            <td className="p-4 align-middle">
+                              {getStatusBadge(i)}
+                            </td>
+                            <td className="p-4 align-middle text-right">
+                              <Button variant="ghost" size="sm">Ver</Button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={7} className="p-4 text-center text-muted-foreground">
+                            Nenhuma extração encontrada com os filtros selecionados
                           </td>
                         </tr>
-                      ))}
-                    {extractions.filter(ext => new Date(ext.date) > new Date()).length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="p-4 text-center text-muted-foreground">
-                          Nenhuma extração agendada
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="estatisticas" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Total Extraído (2025)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {extractions.reduce((sum, ext) => sum + ext.quantity, 0).toFixed(1)} kg
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  +12% em relação ao mesmo período de 2024
-                </p>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="calendario" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Produtividade Média</CardTitle>
+                <CardTitle>Calendário de Extrações</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">15,2 kg/ha</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  -2% em relação à média histórica
-                </p>
+                <ExtractionCalendar 
+                  extractions={filteredExtractions} 
+                  areas={areaNames} 
+                />
               </CardContent>
             </Card>
+            
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Extrações Agendadas</CardTitle>
+                <CardTitle>Próximas Extrações Agendadas</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">8</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Próxima: 15/05/2025 - Área 3
-                </p>
+                <div className="relative w-full overflow-auto">
+                  <table className="w-full caption-bottom text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="h-10 px-4 text-left align-middle font-medium">Data</th>
+                        <th className="h-10 px-4 text-left align-middle font-medium">Área</th>
+                        <th className="h-10 px-4 text-left align-middle font-medium">Equipe</th>
+                        <th className="h-10 px-4 text-right align-middle font-medium">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredExtractions
+                        .filter(ext => new Date(ext.date) > new Date())
+                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                        .slice(0, 5)
+                        .map((extraction) => (
+                          <tr key={extraction.id} className="border-b">
+                            <td className="p-2 align-middle">
+                              {formatDate(new Date(extraction.date))}
+                            </td>
+                            <td className="p-2 align-middle">
+                              {getAreaById(extraction.areaId)?.name || "Desconhecida"}
+                            </td>
+                            <td className="p-2 align-middle">{extraction.team}</td>
+                            <td className="p-2 align-middle text-right">
+                              <Button variant="ghost" size="sm">Ver</Button>
+                            </td>
+                          </tr>
+                        ))}
+                      {filteredExtractions.filter(ext => new Date(ext.date) > new Date()).length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="p-4 text-center text-muted-foreground">
+                            Nenhuma extração agendada
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </CardContent>
             </Card>
-          </div>
-          <Card className="mt-4">
-            <CardHeader>
-              <CardTitle>Histórico de Extrações</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[300px] flex items-center justify-center">
-              <div className="text-center">
-                <Droplet className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                <p className="mt-2 text-muted-foreground">
-                  Gráfico de histórico de extrações por área
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+          
+          <TabsContent value="estatisticas" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Total Extraído (2025)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {extractions.reduce((sum, ext) => sum + ext.quantity, 0).toFixed(1)} kg
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    +12% em relação ao mesmo período de 2024
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Produtividade Média</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">15,2 kg/ha</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    -2% em relação à média histórica
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Extrações Agendadas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">8</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Próxima: 15/05/2025 - Área 3
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Histórico de Extrações</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px] flex items-center justify-center">
+                <div className="text-center">
+                  <Droplet className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                  <p className="mt-2 text-muted-foreground">
+                    Gráfico de histórico de extrações por área
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       <ExtractionDialog
         open={open}
