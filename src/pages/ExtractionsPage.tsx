@@ -3,7 +3,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Droplet, Plus } from "lucide-react";
+import { Droplet, Edit, Plus, Trash } from "lucide-react";
 import { Area, Extraction } from "@/types";
 import { ExtractionDialog } from "@/components/extractions/ExtractionDialog";
 import { toast } from "@/hooks/use-toast";
@@ -15,9 +15,14 @@ import ExtractionTrendsChart from "@/components/extractions/ExtractionTrendsChar
 import ExtractionByAreaChart from "@/components/extractions/ExtractionByAreaChart";
 import ExtractionByTeamChart from "@/components/extractions/ExtractionByTeamChart";
 import ExtractionStats from "@/components/extractions/ExtractionStats";
+import { DeleteExtractionDialog } from "@/components/extractions/DeleteExtractionDialog";
 
 export default function ExtractionsPage() {
   const [open, setOpen] = useState(false);
+  const [editingExtraction, setEditingExtraction] = useState<Extraction | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [extractionToDelete, setExtractionToDelete] = useState<Extraction | null>(null);
+  
   const [areas] = useState<Area[]>([
     {
       id: "1",
@@ -132,18 +137,66 @@ export default function ExtractionsPage() {
   const [filteredExtractions, setFilteredExtractions] = useState<Extraction[]>(extractions);
 
   const handleSaveExtraction = (data: Omit<Extraction, "id" | "createdAt">) => {
-    const newExtraction: Extraction = {
-      ...data,
-      id: `${extractions.length + 1}`,
-      date: data.date as string,
-      createdAt: new Date().toISOString(),
-    };
-    
-    setExtractions((prev) => [...prev, newExtraction]);
-    toast({
-      title: "Extração registrada",
-      description: `Uma nova extração foi registrada para a ${areas.find(a => a.id === data.areaId)?.name}.`
-    });
+    if (editingExtraction) {
+      // Editar extração existente
+      const updatedExtractions = extractions.map(ext => 
+        ext.id === editingExtraction.id 
+          ? { ...data, id: ext.id, createdAt: ext.createdAt } 
+          : ext
+      );
+      setExtractions(updatedExtractions);
+      setFilteredExtractions(prev => 
+        prev.map(ext => ext.id === editingExtraction.id 
+          ? { ...data, id: ext.id, createdAt: ext.createdAt } 
+          : ext)
+      );
+      toast({
+        title: "Extração atualizada",
+        description: `A extração foi atualizada com sucesso.`
+      });
+      setEditingExtraction(null);
+    } else {
+      // Adicionar nova extração
+      const newExtraction: Extraction = {
+        ...data,
+        id: `${extractions.length + 1}`,
+        date: data.date as string,
+        createdAt: new Date().toISOString(),
+      };
+      
+      setExtractions((prev) => [...prev, newExtraction]);
+      setFilteredExtractions((prev) => [...prev, newExtraction]);
+      toast({
+        title: "Extração registrada",
+        description: `Uma nova extração foi registrada para a ${getAreaById(data.areaId)?.name}.`
+      });
+    }
+  };
+
+  const handleEditExtraction = (extraction: Extraction) => {
+    setEditingExtraction(extraction);
+    setOpen(true);
+  };
+
+  const handleDeleteClick = (extraction: Extraction) => {
+    setExtractionToDelete(extraction);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (extractionToDelete) {
+      const updatedExtractions = extractions.filter(ext => ext.id !== extractionToDelete.id);
+      setExtractions(updatedExtractions);
+      setFilteredExtractions(prev => prev.filter(ext => ext.id !== extractionToDelete.id));
+      
+      toast({
+        title: "Extração excluída",
+        description: `A extração foi excluída com sucesso.`
+      });
+      
+      setDeleteDialogOpen(false);
+      setExtractionToDelete(null);
+    }
   };
 
   const handleFilterChange = (filters: {
@@ -242,7 +295,10 @@ export default function ExtractionsPage() {
             Acompanhe todas as extrações de resina realizadas
           </p>
         </div>
-        <Button className="gap-1" onClick={() => setOpen(true)}>
+        <Button className="gap-1" onClick={() => {
+          setEditingExtraction(null);
+          setOpen(true);
+        }}>
           <Plus size={18} />
           <span>Nova Extração</span>
         </Button>
@@ -298,7 +354,25 @@ export default function ExtractionsPage() {
                               {getStatusBadge(i)}
                             </td>
                             <td className="p-4 align-middle text-right">
-                              <Button variant="ghost" size="sm">Ver</Button>
+                              <div className="flex justify-end gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => handleEditExtraction(extraction)}
+                                >
+                                  <Edit size={16} />
+                                  <span className="sr-only">Editar</span>
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                                  onClick={() => handleDeleteClick(extraction)}
+                                >
+                                  <Trash size={16} />
+                                  <span className="sr-only">Excluir</span>
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -359,7 +433,25 @@ export default function ExtractionsPage() {
                             </td>
                             <td className="p-2 align-middle">{extraction.team}</td>
                             <td className="p-2 align-middle text-right">
-                              <Button variant="ghost" size="sm">Ver</Button>
+                              <div className="flex justify-end gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => handleEditExtraction(extraction)}
+                                >
+                                  <Edit size={16} />
+                                  <span className="sr-only">Editar</span>
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                                  onClick={() => handleDeleteClick(extraction)}
+                                >
+                                  <Trash size={16} />
+                                  <span className="sr-only">Excluir</span>
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -402,8 +494,16 @@ export default function ExtractionsPage() {
       <ExtractionDialog
         open={open}
         onOpenChange={setOpen}
+        extraction={editingExtraction}
         areas={areas.filter(area => area.status === "extracao")}
         onSave={handleSaveExtraction}
+      />
+
+      <DeleteExtractionDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        extraction={extractionToDelete}
+        onConfirm={handleConfirmDelete}
       />
     </MainLayout>
   );

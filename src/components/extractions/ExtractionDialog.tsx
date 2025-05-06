@@ -12,7 +12,7 @@ import { ExtractionForm } from "@/components/forms/ExtractionForm";
 interface ExtractionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  extraction?: Extraction;
+  extraction?: Extraction | null;
   areas: Area[];
   onSave: (data: any) => void;
 }
@@ -36,7 +36,7 @@ export function ExtractionDialog({
           </DialogDescription>
         </DialogHeader>
         <ExtractionForm
-          extraction={extraction}
+          extraction={extraction || undefined}
           areas={areas}
           onSubmit={(data) => {
             onSave(data);
