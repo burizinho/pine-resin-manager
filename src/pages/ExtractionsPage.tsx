@@ -11,6 +11,10 @@ import { ExtractionCalendar } from "@/components/extractions/ExtractionCalendar"
 import { formatDate } from "@/lib/formatters";
 import { ExtractionFilters } from "@/components/extractions/ExtractionFilters";
 import { DateRange } from "react-day-picker";
+import ExtractionTrendsChart from "@/components/extractions/ExtractionTrendsChart";
+import ExtractionByAreaChart from "@/components/extractions/ExtractionByAreaChart";
+import ExtractionByTeamChart from "@/components/extractions/ExtractionByTeamChart";
+import ExtractionStats from "@/components/extractions/ExtractionStats";
 
 export default function ExtractionsPage() {
   const [open, setOpen] = useState(false);
@@ -373,57 +377,20 @@ export default function ExtractionsPage() {
             </Card>
           </TabsContent>
           
-          <TabsContent value="estatisticas" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Total Extraído (2025)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">
-                    {extractions.reduce((sum, ext) => sum + ext.quantity, 0).toFixed(1)} kg
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    +12% em relação ao mesmo período de 2024
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Produtividade Média</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">15,2 kg/ha</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    -2% em relação à média histórica
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Extrações Agendadas</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">8</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Próxima: 15/05/2025 - Área 3
-                  </p>
-                </CardContent>
-              </Card>
+          <TabsContent value="estatisticas" className="space-y-6">
+            <ExtractionStats extractions={filteredExtractions} areas={areas} />
+            
+            <ExtractionTrendsChart extractions={filteredExtractions} />
+            
+            <div className="grid gap-6 md:grid-cols-2">
+              <ExtractionByAreaChart 
+                extractions={filteredExtractions} 
+                areas={areaNames} 
+              />
+              <ExtractionByTeamChart 
+                extractions={filteredExtractions} 
+              />
             </div>
-            <Card className="mt-4">
-              <CardHeader>
-                <CardTitle>Histórico de Extrações</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[300px] flex items-center justify-center">
-                <div className="text-center">
-                  <Droplet className="mx-auto h-12 w-12 text-muted-foreground/50" />
-                  <p className="mt-2 text-muted-foreground">
-                    Gráfico de histórico de extrações por área
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </div>
