@@ -1,8 +1,7 @@
-
 import { useMemo } from 'react';
 import { Extraction, Area } from '@/types';
 import StatsCard from '@/components/dashboard/StatsCard';
-import { ChartLine, UsersThree, TrendingUp, CalendarClock } from 'lucide-react';
+import { ChartLine, Users, TrendingUp, CalendarClock } from 'lucide-react';
 import { parseISO, isAfter, subDays } from 'date-fns';
 
 interface ExtractionStatsProps {
@@ -90,7 +89,7 @@ export default function ExtractionStats({ extractions, areas }: ExtractionStatsP
         title="Equipes Envolvidas"
         value={stats.teamsCount}
         description="Equipes realizando extrações"
-        icon={<UsersThree className="h-4 w-4" />}
+        icon={<Users className="h-4 w-4" />}
       />
       
       <StatsCard

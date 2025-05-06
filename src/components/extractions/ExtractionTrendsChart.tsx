@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Extraction } from '@/types';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
@@ -18,7 +18,7 @@ export default function ExtractionTrendsChart({ extractions }: ExtractionTrendsC
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('6months');
 
   // Process data based on selected time frame
-  const chartData = React.useMemo(() => {
+  const chartData = useMemo(() => {
     const now = new Date();
     let startDate: Date;
     
