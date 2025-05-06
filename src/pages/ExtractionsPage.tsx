@@ -124,7 +124,7 @@ export default function ExtractionsPage() {
       date: "2025-05-14",
       quantity: 90.0,
       team: "Equipe B",
-      notes: "Teste de nova técnica",
+      notes: "Teste de nova t��cnica",
       createdAt: "2025-05-14T10:00:00Z",
     },
   ]);
@@ -380,8 +380,12 @@ export default function ExtractionsPage() {
           <TabsContent value="estatisticas" className="space-y-6">
             <ExtractionStats extractions={filteredExtractions} areas={areas} />
             
-            <ExtractionTrendsChart extractions={filteredExtractions} />
+            {/* Separation for the trends chart */}
+            <div className="w-full">
+              <ExtractionTrendsChart extractions={filteredExtractions} />
+            </div>
             
+            {/* Proper grid layout for the area and team charts */}
             <div className="grid gap-6 md:grid-cols-2">
               <ExtractionByAreaChart 
                 extractions={filteredExtractions} 
