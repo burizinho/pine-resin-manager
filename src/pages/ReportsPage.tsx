@@ -9,6 +9,7 @@ import QualityPieChart from "@/components/reports/QualityPieChart";
 import EfficiencyAnalysis from "@/components/reports/EfficiencyAnalysis";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
 import ReportsKpis from "@/components/reports/ReportsKpis";
+import ProductivityTrends from "@/components/reports/ProductivityTrends";
 
 export default function ReportsPage() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -33,6 +34,8 @@ export default function ReportsPage() {
         <DateRangeFilter onDateChange={handleDateChange} />
         
         <ReportsKpis dateRange={dateRange} />
+
+        <ProductivityTrends dateRange={dateRange} />
 
         <div className="grid gap-6 md:grid-cols-2">
           <ProductionChart dateRange={dateRange} />
