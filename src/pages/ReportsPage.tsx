@@ -8,6 +8,7 @@ import ComparativeChart from "@/components/reports/ComparativeChart";
 import QualityPieChart from "@/components/reports/QualityPieChart";
 import EfficiencyAnalysis from "@/components/reports/EfficiencyAnalysis";
 import { DateRangeFilter } from "@/components/reports/DateRangeFilter";
+import ReportsKpis from "@/components/reports/ReportsKpis";
 
 export default function ReportsPage() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -30,6 +31,8 @@ export default function ReportsPage() {
         </div>
 
         <DateRangeFilter onDateChange={handleDateChange} />
+        
+        <ReportsKpis dateRange={dateRange} />
 
         <div className="grid gap-6 md:grid-cols-2">
           <ProductionChart dateRange={dateRange} />
