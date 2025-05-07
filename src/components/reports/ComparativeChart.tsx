@@ -1,31 +1,33 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DateRange } from 'react-day-picker';
+import { isWithinInterval, parseISO } from 'date-fns';
 
-// Sample data for comparative analysis with enhanced metrics
-const comparativeData = {
+// Sample data for comparative analysis with enhanced metrics and dates
+const fullComparativeData = {
   production: [
-    { name: '2022', atual: 1600, anterior: 1500, meta: 1550 },
-    { name: '2023', atual: 1850, anterior: 1600, meta: 1700 },
-    { name: '2024', atual: 2450, anterior: 1850, meta: 2000 },
+    { name: '2022', atual: 1600, anterior: 1500, meta: 1550, date: '2022-12-31' },
+    { name: '2023', atual: 1850, anterior: 1600, meta: 1700, date: '2023-12-31' },
+    { name: '2024', atual: 2450, anterior: 1850, meta: 2000, date: '2024-05-15' },
   ],
   productivity: [
-    { name: '2022', atual: 15.8, anterior: 15.0, meta: 15.5 },
-    { name: '2023', atual: 17.5, anterior: 15.8, meta: 17.0 },
-    { name: '2024', atual: 19.8, anterior: 17.5, meta: 19.0 },
+    { name: '2022', atual: 15.8, anterior: 15.0, meta: 15.5, date: '2022-12-31' },
+    { name: '2023', atual: 17.5, anterior: 15.8, meta: 17.0, date: '2023-12-31' },
+    { name: '2024', atual: 19.8, anterior: 17.5, meta: 19.0, date: '2024-05-15' },
   ],
   quality: [
-    { name: '2022', atual: 68, anterior: 65, meta: 67 },
-    { name: '2023', atual: 72, anterior: 68, meta: 70 },
-    { name: '2024', atual: 78, anterior: 72, meta: 75 },
+    { name: '2022', atual: 68, anterior: 65, meta: 67, date: '2022-12-31' },
+    { name: '2023', atual: 72, anterior: 68, meta: 70, date: '2023-12-31' },
+    { name: '2024', atual: 78, anterior: 72, meta: 75, date: '2024-05-15' },
   ],
   efficiency: [
-    { name: '2022', atual: 81, anterior: 78, meta: 80 },
-    { name: '2023', atual: 84, anterior: 81, meta: 83 },
-    { name: '2024', atual: 89, anterior: 84, meta: 86 },
+    { name: '2022', atual: 81, anterior: 78, meta: 80, date: '2022-12-31' },
+    { name: '2023', atual: 84, anterior: 81, meta: 83, date: '2023-12-31' },
+    { name: '2024', atual: 89, anterior: 84, meta: 86, date: '2024-05-15' },
   ]
 };
 
@@ -46,16 +48,33 @@ const metricUnits = {
 type MetricType = 'production' | 'productivity' | 'quality' | 'efficiency';
 type ViewMode = 'bar' | 'progress';
 
-export default function ComparativeChart() {
+interface ComparativeChartProps {
+  dateRange?: DateRange;
+}
+
+export default function ComparativeChart({ dateRange }: ComparativeChartProps) {
   const [metric, setMetric] = useState<MetricType>('production');
   const [viewMode, setViewMode] = useState<ViewMode>('bar');
 
-  const data = comparativeData[metric];
+  // Filter data based on date range
+  const filteredData = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) {
+      return fullComparativeData[metric];
+    }
 
-  // Calculate growth percentages for the current year
-  const currentYearData = data[data.length - 1];
-  const vsLastYear = ((currentYearData.atual - currentYearData.anterior) / currentYearData.anterior * 100).toFixed(1);
-  const vsMeta = ((currentYearData.atual - currentYearData.meta) / currentYearData.meta * 100).toFixed(1);
+    return fullComparativeData[metric].filter(item => {
+      const itemDate = parseISO(item.date);
+      return isWithinInterval(itemDate, { 
+        start: dateRange.from!, 
+        end: dateRange.to || dateRange.from! 
+      });
+    });
+  }, [metric, dateRange]);
+
+  // Calculate growth percentages for the current year if data exists
+  const currentYearData = filteredData.length ? filteredData[filteredData.length - 1] : null;
+  const vsLastYear = currentYearData ? ((currentYearData.atual - currentYearData.anterior) / currentYearData.anterior * 100).toFixed(1) : '0.0';
+  const vsMeta = currentYearData ? ((currentYearData.atual - currentYearData.meta) / currentYearData.meta * 100).toFixed(1) : '0.0';
 
   return (
     <Card>
@@ -106,7 +125,7 @@ export default function ComparativeChart() {
         <div className="h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={data}
+              data={filteredData}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -131,7 +150,9 @@ export default function ComparativeChart() {
                 }}
               />
               <Legend />
-              <ReferenceLine y={data[data.length-1].meta} stroke="#f59e0b" strokeDasharray="3 3" label="Meta" />
+              {currentYearData && (
+                <ReferenceLine y={currentYearData.meta} stroke="#f59e0b" strokeDasharray="3 3" label="Meta" />
+              )}
               <Bar name="Ano Atual" dataKey="atual" fill="#3c9a4e" />
               <Bar name="Ano Anterior" dataKey="anterior" fill="#9ca3af" />
             </BarChart>

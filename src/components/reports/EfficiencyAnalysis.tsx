@@ -1,13 +1,15 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Scatter, ScatterChart, ZAxis, Cell } from 'recharts';
 import { ChartContainer } from '@/components/ui/chart';
 import { formatDate } from '@/lib/formatters';
+import { DateRange } from 'react-day-picker';
+import { isWithinInterval, parseISO } from 'date-fns';
 
-// Sample data for efficiency analysis
-const efficiencyData = {
+// Sample data for efficiency analysis with dates
+const fullEfficiencyData = {
   timeVsQuantity: [
     { date: '2024-01-15', team: 'Equipe A', timeSpent: 5.2, quantity: 42, efficiency: 8.1 },
     { date: '2024-01-22', team: 'Equipe B', timeSpent: 6.5, quantity: 58, efficiency: 8.9 },
@@ -21,11 +23,11 @@ const efficiencyData = {
     { date: '2024-05-02', team: 'Equipe C', timeSpent: 6.0, quantity: 67, efficiency: 11.2 },
   ],
   treeEfficiency: [
-    { month: 'Jan', treeCount: 500, quantity: 42, efficiency: 0.084 },
-    { month: 'Fev', treeCount: 500, quantity: 97, efficiency: 0.194 },
-    { month: 'Mar', treeCount: 800, quantity: 105, efficiency: 0.131 },
-    { month: 'Abr', treeCount: 800, quantity: 95, efficiency: 0.119 },
-    { month: 'Mai', treeCount: 650, quantity: 67, efficiency: 0.103 },
+    { month: 'Jan', treeCount: 500, quantity: 42, efficiency: 0.084, date: '2024-01-31' },
+    { month: 'Fev', treeCount: 500, quantity: 97, efficiency: 0.194, date: '2024-02-28' },
+    { month: 'Mar', treeCount: 800, quantity: 105, efficiency: 0.131, date: '2024-03-31' },
+    { month: 'Abr', treeCount: 800, quantity: 95, efficiency: 0.119, date: '2024-04-30' },
+    { month: 'Mai', treeCount: 650, quantity: 67, efficiency: 0.103, date: '2024-05-31' },
   ]
 };
 
@@ -35,8 +37,39 @@ const teamColors = {
   'Equipe C': '#f59e0b',
 };
 
-export default function EfficiencyAnalysis() {
+interface EfficiencyAnalysisProps {
+  dateRange?: DateRange;
+}
+
+export default function EfficiencyAnalysis({ dateRange }: EfficiencyAnalysisProps) {
   const [activeTab, setActiveTab] = useState('timeVsQuantity');
+
+  // Filter data based on date range
+  const filteredData = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) {
+      return {
+        timeVsQuantity: fullEfficiencyData.timeVsQuantity,
+        treeEfficiency: fullEfficiencyData.treeEfficiency
+      };
+    }
+
+    return {
+      timeVsQuantity: fullEfficiencyData.timeVsQuantity.filter(item => {
+        const itemDate = parseISO(item.date);
+        return isWithinInterval(itemDate, { 
+          start: dateRange.from!, 
+          end: dateRange.to || dateRange.from! 
+        });
+      }),
+      treeEfficiency: fullEfficiencyData.treeEfficiency.filter(item => {
+        const itemDate = parseISO(item.date);
+        return isWithinInterval(itemDate, { 
+          start: dateRange.from!, 
+          end: dateRange.to || dateRange.from! 
+        });
+      })
+    };
+  }, [dateRange]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -138,8 +171,8 @@ export default function EfficiencyAnalysis() {
                       color
                     }))
                   } />
-                  <Scatter name="Extrações" data={efficiencyData.timeVsQuantity}>
-                    {efficiencyData.timeVsQuantity.map((entry, index) => (
+                  <Scatter name="Extrações" data={filteredData.timeVsQuantity}>
+                    {filteredData.timeVsQuantity.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={teamColors[entry.team as keyof typeof teamColors]} />
                     ))}
                   </Scatter>
@@ -150,7 +183,7 @@ export default function EfficiencyAnalysis() {
           <TabsContent value="treeEfficiency" className="h-[350px]">
             <ChartContainer config={chartConfig}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={efficiencyData.treeEfficiency} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <LineChart data={filteredData.treeEfficiency} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="month" />
                   <YAxis yAxisId="left" label={{ value: 'Quantidade (kg)', angle: -90, position: 'insideLeft' }} />

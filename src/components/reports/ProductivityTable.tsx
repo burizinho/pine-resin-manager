@@ -1,11 +1,14 @@
 
+import { useMemo } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatArea, formatPercentage } from '@/lib/formatters';
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
+import { isWithinInterval, parseISO } from 'date-fns';
 
-// Sample data for productivity by area with enhanced metrics
-const productivityData = [
+// Sample data for productivity by area with enhanced metrics and dates
+const fullProductivityData = [
   { 
     area: 'Área 1', 
     tamanho: 7.5, 
@@ -14,7 +17,8 @@ const productivityData = [
     produtividade: 20.0, 
     produtividadeArvore: 0.3,
     eficiencia: 92, 
-    variacao: 12 
+    variacao: 12,
+    date: '2024-03-10' 
   },
   { 
     area: 'Área 2', 
@@ -24,7 +28,8 @@ const productivityData = [
     produtividade: 20.0, 
     produtividadeArvore: 0.25,
     eficiencia: 84, 
-    variacao: 2 
+    variacao: 2,
+    date: '2024-04-05' 
   },
   { 
     area: 'Área 3', 
@@ -34,7 +39,8 @@ const productivityData = [
     produtividade: 16.4, 
     produtividadeArvore: 0.225,
     eficiencia: 75, 
-    variacao: -5 
+    variacao: -5,
+    date: '2024-04-15' 
   },
   { 
     area: 'Área 4', 
@@ -44,7 +50,8 @@ const productivityData = [
     produtividade: 21.6, 
     produtividadeArvore: 0.27,
     eficiencia: 96, 
-    variacao: 14 
+    variacao: 14,
+    date: '2024-04-25' 
   },
   { 
     area: 'Área 5', 
@@ -54,11 +61,31 @@ const productivityData = [
     produtividade: 20.0, 
     produtividadeArvore: 0.246,
     eficiencia: 88, 
-    variacao: 3 
+    variacao: 3,
+    date: '2024-05-10' 
   },
 ];
 
-export default function ProductivityTable() {
+interface ProductivityTableProps {
+  dateRange?: DateRange;
+}
+
+export default function ProductivityTable({ dateRange }: ProductivityTableProps) {
+  // Filter data based on date range
+  const filteredData = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) {
+      return fullProductivityData;
+    }
+
+    return fullProductivityData.filter(item => {
+      const itemDate = parseISO(item.date);
+      return isWithinInterval(itemDate, { 
+        start: dateRange.from!, 
+        end: dateRange.to || dateRange.from! 
+      });
+    });
+  }, [dateRange]);
+
   return (
     <Card>
       <CardHeader>
@@ -80,7 +107,7 @@ export default function ProductivityTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {productivityData.map((row, i) => (
+              {filteredData.map((row, i) => (
                 <TableRow key={i}>
                   <TableCell className="font-medium">{row.area}</TableCell>
                   <TableCell>{formatArea(row.tamanho)}</TableCell>

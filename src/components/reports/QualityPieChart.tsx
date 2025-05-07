@@ -1,12 +1,15 @@
 
+import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DateRange } from 'react-day-picker';
+import { isWithinInterval, parseISO } from 'date-fns';
 
-// Sample data for quality distribution
-const qualityData = [
-  { name: 'Premium', value: 45, color: '#3c9a4e' },
-  { name: 'Padrão', value: 35, color: '#ffa722' },
-  { name: 'Básica', value: 20, color: '#ef4444' },
+// Sample data for quality distribution with dates
+const fullQualityData = [
+  { name: 'Premium', value: 45, color: '#3c9a4e', date: '2024-03-15' },
+  { name: 'Padrão', value: 35, color: '#ffa722', date: '2024-04-10' },
+  { name: 'Básica', value: 20, color: '#ef4444', date: '2024-05-05' },
 ];
 
 const RADIAN = Math.PI / 180;
@@ -22,7 +25,26 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   );
 };
 
-export default function QualityPieChart() {
+interface QualityPieChartProps {
+  dateRange?: DateRange;
+}
+
+export default function QualityPieChart({ dateRange }: QualityPieChartProps) {
+  // Filter data based on date range
+  const filteredData = useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) {
+      return fullQualityData;
+    }
+
+    return fullQualityData.filter(item => {
+      const itemDate = parseISO(item.date);
+      return isWithinInterval(itemDate, { 
+        start: dateRange.from!, 
+        end: dateRange.to || dateRange.from! 
+      });
+    });
+  }, [dateRange]);
+
   return (
     <Card>
       <CardHeader>
@@ -33,7 +55,7 @@ export default function QualityPieChart() {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={qualityData}
+              data={filteredData}
               cx="50%"
               cy="50%"
               labelLine={false}
@@ -42,7 +64,7 @@ export default function QualityPieChart() {
               fill="#8884d8"
               dataKey="value"
             >
-              {qualityData.map((entry, index) => (
+              {filteredData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
