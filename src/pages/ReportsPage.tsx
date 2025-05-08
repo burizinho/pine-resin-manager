@@ -23,31 +23,43 @@ export default function ReportsPage() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-7">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-1">Relatórios</h1>
           <p className="text-muted-foreground">
             Acompanhe os indicadores de desempenho da produção de resina
           </p>
         </div>
 
-        <DateRangeFilter onDateChange={handleDateChange} />
+        <div className="bg-secondary/40 p-4 rounded-lg shadow-sm">
+          <DateRangeFilter onDateChange={handleDateChange} />
+        </div>
         
         <ReportsKpis dateRange={dateRange} />
 
-        <ProductivityTrends dateRange={dateRange} />
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <ProductionChart dateRange={dateRange} />
-          <ComparativeChart dateRange={dateRange} />
+        <div className="bg-gradient-to-b from-secondary/20 to-transparent rounded-lg p-5 shadow-sm">
+          <ProductivityTrends dateRange={dateRange} />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <ProductivityTable dateRange={dateRange} />
-          <QualityPieChart dateRange={dateRange} />
+        <div className="grid gap-7 md:grid-cols-2">
+          <div className="bg-gradient-to-br from-secondary/30 to-transparent p-5 rounded-lg shadow-sm">
+            <ProductionChart dateRange={dateRange} />
+          </div>
+          <div className="bg-gradient-to-bl from-secondary/30 to-transparent p-5 rounded-lg shadow-sm">
+            <ComparativeChart dateRange={dateRange} />
+          </div>
         </div>
 
-        <div className="w-full">
+        <div className="grid gap-7 md:grid-cols-2">
+          <div className="bg-gradient-to-tr from-secondary/30 to-transparent p-5 rounded-lg shadow-sm">
+            <ProductivityTable dateRange={dateRange} />
+          </div>
+          <div className="bg-gradient-to-tl from-secondary/30 to-transparent p-5 rounded-lg shadow-sm">
+            <QualityPieChart dateRange={dateRange} />
+          </div>
+        </div>
+
+        <div className="w-full bg-gradient-to-t from-secondary/20 to-transparent p-5 rounded-lg shadow-sm">
           <EfficiencyAnalysis dateRange={dateRange} />
         </div>
       </div>

@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DateRange } from 'react-day-picker';
 import { isWithinInterval, parseISO } from 'date-fns';
+import { ChartContainer } from '@/components/ui/chart';
 
 // Sample data for comparative analysis with enhanced metrics and dates
 const fullComparativeData = {
@@ -48,6 +49,30 @@ const metricUnits = {
 type MetricType = 'production' | 'productivity' | 'quality' | 'efficiency';
 type ViewMode = 'bar' | 'progress';
 
+const chartConfig = {
+  atual: {
+    theme: {
+      light: "#3c9a4e",
+      dark: "#4ade80",
+    },
+    label: "Atual",
+  },
+  anterior: {
+    theme: {
+      light: "#9ca3af",
+      dark: "#6b7280",
+    },
+    label: "Anterior",
+  },
+  meta: {
+    theme: {
+      light: "#f59e0b",
+      dark: "#fbbf24", 
+    },
+    label: "Meta",
+  }
+};
+
 interface ComparativeChartProps {
   dateRange?: DateRange;
 }
@@ -76,25 +101,50 @@ export default function ComparativeChart({ dateRange }: ComparativeChartProps) {
   const vsLastYear = currentYearData ? ((currentYearData.atual - currentYearData.anterior) / currentYearData.anterior * 100).toFixed(1) : '0.0';
   const vsMeta = currentYearData ? ((currentYearData.atual - currentYearData.meta) / currentYearData.meta * 100).toFixed(1) : '0.0';
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background border rounded-lg p-3 shadow-md">
+          <p className="font-medium">{label}</p>
+          <div className="space-y-1.5 mt-2">
+            {payload.map((entry: any, index: number) => (
+              <div key={index} className="flex items-center gap-2">
+                <span 
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: entry.color }}
+                ></span>
+                <span className="text-muted-foreground text-xs">{entry.name}: </span>
+                <span className="font-semibold">
+                  {`${entry.value} ${metricUnits[metric as MetricType]}`}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="flex flex-row items-center justify-between bg-secondary/40 rounded-t-lg">
         <div>
-          <CardTitle>Análise Comparativa</CardTitle>
+          <CardTitle className="text-xl">Análise Comparativa</CardTitle>
           <CardDescription>Evolução e comparação de desempenho</CardDescription>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Tabs defaultValue="bar" value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
-            <TabsList className="grid w-[160px] grid-cols-2">
-              <TabsTrigger value="bar">Barras</TabsTrigger>
-              <TabsTrigger value="progress">Progresso</TabsTrigger>
+            <TabsList className="grid w-[140px] grid-cols-2 h-8">
+              <TabsTrigger value="bar" className="text-xs">Barras</TabsTrigger>
+              <TabsTrigger value="progress" className="text-xs">Progresso</TabsTrigger>
             </TabsList>
           </Tabs>
           <Select
             value={metric}
             onValueChange={(value) => setMetric(value as MetricType)}
           >
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] border-primary/20 bg-background h-8">
               <SelectValue placeholder="Selecione uma métrica" />
             </SelectTrigger>
             <SelectContent>
@@ -106,57 +156,95 @@ export default function ComparativeChart({ dateRange }: ComparativeChartProps) {
           </Select>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         <div className="mb-6 grid grid-cols-2 gap-4">
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Vs. Ano Anterior</div>
+          <div className="rounded-lg border p-3 hover:shadow-sm transition-shadow bg-background/80">
+            <div className="text-sm text-muted-foreground mb-1">Vs. Ano Anterior</div>
             <div className={`text-2xl font-bold ${Number(vsLastYear) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {vsLastYear}%
             </div>
           </div>
-          <div className="rounded-lg border p-3">
-            <div className="text-sm text-muted-foreground">Vs. Meta</div>
+          <div className="rounded-lg border p-3 hover:shadow-sm transition-shadow bg-background/80">
+            <div className="text-sm text-muted-foreground mb-1">Vs. Meta</div>
             <div className={`text-2xl font-bold ${Number(vsMeta) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {vsMeta}%
             </div>
           </div>
         </div>
         
-        <div className="h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={filteredData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="name" />
-              <YAxis 
-                label={{ 
-                  value: metricLabels[metric], 
-                  angle: -90, 
-                  position: 'insideLeft',
-                  style: { textAnchor: 'middle' }
-                }} 
-              />
-              <Tooltip 
-                formatter={(value) => [
-                  `${value} ${metricUnits[metric]}`, 
-                  ''
-                ]}
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--background)',
-                }}
-              />
-              <Legend />
-              {currentYearData && (
-                <ReferenceLine y={currentYearData.meta} stroke="#f59e0b" strokeDasharray="3 3" label="Meta" />
-              )}
-              <Bar name="Ano Atual" dataKey="atual" fill="#3c9a4e" />
-              <Bar name="Ano Anterior" dataKey="anterior" fill="#9ca3af" />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="h-[320px]">
+          <ChartContainer config={chartConfig}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={filteredData}
+                margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
+                barGap={4}
+                barCategoryGap={30}
+              >
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted/50" vertical={false} />
+                <XAxis 
+                  dataKey="name"
+                  tick={{ fill: 'var(--foreground)', fontSize: 12 }}
+                  axisLine={{ stroke: 'var(--muted)' }}
+                  tickLine={{ stroke: 'var(--muted)' }}
+                />
+                <YAxis 
+                  label={{ 
+                    value: metricLabels[metric], 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { 
+                      textAnchor: 'middle',
+                      fill: 'var(--muted-foreground)',
+                      fontSize: 12
+                    }
+                  }}
+                  tick={{ fill: 'var(--foreground)', fontSize: 11 }}
+                  axisLine={{ stroke: 'var(--muted)' }}
+                  tickLine={{ stroke: 'var(--muted)' }}
+                />
+                <Tooltip 
+                  content={<CustomTooltip />}
+                  cursor={{ fill: 'var(--secondary)', opacity: 0.2 }}
+                />
+                <Legend 
+                  iconType="circle"
+                  iconSize={10}
+                  wrapperStyle={{ paddingTop: 10 }}
+                />
+                {currentYearData && (
+                  <ReferenceLine 
+                    y={currentYearData.meta} 
+                    stroke="var(--color-meta)" 
+                    strokeDasharray="3 3" 
+                    label={{
+                      position: 'right',
+                      value: 'Meta',
+                      fill: 'var(--color-meta)',
+                      fontSize: 10
+                    }}
+                  />
+                )}
+                <Bar 
+                  name="Ano Atual" 
+                  dataKey="atual" 
+                  fill="var(--color-atual)"
+                  radius={[4, 4, 0, 0]} 
+                  animationDuration={800}
+                  maxBarSize={60}
+                />
+                <Bar 
+                  name="Ano Anterior" 
+                  dataKey="anterior" 
+                  fill="var(--color-anterior)" 
+                  radius={[4, 4, 0, 0]}
+                  animationDuration={800}
+                  animationBegin={200}
+                  maxBarSize={60}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
         </div>
       </CardContent>
     </Card>

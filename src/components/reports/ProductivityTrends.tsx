@@ -63,8 +63,8 @@ export default function ProductivityTrends({ dateRange }: ProductivityTrendsProp
     },
     efficiency: {
       theme: {
-        light: "#2563eb",
-        dark: "#3b82f6",
+        light: "#3b82f6",
+        dark: "#60a5fa",
       },
       label: "Eficiência (%)",
     },
@@ -83,17 +83,17 @@ export default function ProductivityTrends({ dateRange }: ProductivityTrendsProp
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="w-full hover:shadow-md transition-shadow">
+      <CardHeader className="flex flex-row items-center justify-between bg-secondary/40 rounded-t-lg">
         <div>
-          <CardTitle>Tendências de Produtividade</CardTitle>
+          <CardTitle className="text-xl">Tendências de Produtividade</CardTitle>
           <CardDescription>Evolução dos indicadores ao longo do tempo</CardDescription>
         </div>
         <Select
           value={selectedMetrics.join(',')}
           onValueChange={handleMetricChange}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[200px] border-primary/20 bg-background">
             <SelectValue placeholder="Selecionar métricas" />
           </SelectTrigger>
           <SelectContent>
@@ -104,19 +104,28 @@ export default function ProductivityTrends({ dateRange }: ProductivityTrendsProp
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="h-[400px]">
+      <CardContent className="h-[400px] pt-6">
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+            <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 30 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" opacity={0.5} />
               <XAxis 
                 dataKey="formattedDate" 
                 className="text-xs"
                 angle={-45}
                 textAnchor="end"
                 height={60}
+                tick={{ fill: 'var(--foreground)', fontSize: 11 }}
+                tickLine={{ stroke: 'var(--muted)' }}
+                axisLine={{ stroke: 'var(--muted)' }}
               />
-              <YAxis className="text-xs" />
+              <YAxis 
+                className="text-xs" 
+                tick={{ fill: 'var(--foreground)', fontSize: 11 }}
+                tickLine={{ stroke: 'var(--muted)' }}
+                axisLine={{ stroke: 'var(--muted)' }}
+                width={60}
+              />
               <ChartTooltip
                 content={
                   <ChartTooltipContent />
@@ -128,9 +137,10 @@ export default function ProductivityTrends({ dateRange }: ProductivityTrendsProp
                   name="Produtividade" 
                   dataKey="productivity" 
                   stroke="var(--color-productivity)" 
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  activeDot={{ r: 5 }}
+                  strokeWidth={2.5}
+                  dot={{ r: 4, strokeWidth: 2, fill: 'var(--background)' }}
+                  activeDot={{ r: 6, strokeWidth: 0 }}
+                  animationDuration={1000}
                 />
               )}
               {selectedMetrics.includes('efficiency') && (
@@ -139,9 +149,10 @@ export default function ProductivityTrends({ dateRange }: ProductivityTrendsProp
                   name="Eficiência" 
                   dataKey="efficiency" 
                   stroke="var(--color-efficiency)" 
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  activeDot={{ r: 5 }}
+                  strokeWidth={2.5}
+                  dot={{ r: 4, strokeWidth: 2, fill: 'var(--background)' }}
+                  activeDot={{ r: 6, strokeWidth: 0 }}
+                  animationDuration={1000}
                 />
               )}
               {selectedMetrics.includes('quality') && (
@@ -150,12 +161,17 @@ export default function ProductivityTrends({ dateRange }: ProductivityTrendsProp
                   name="Qualidade" 
                   dataKey="quality" 
                   stroke="var(--color-quality)" 
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  activeDot={{ r: 5 }}
+                  strokeWidth={2.5}
+                  dot={{ r: 4, strokeWidth: 2, fill: 'var(--background)' }}
+                  activeDot={{ r: 6, strokeWidth: 0 }}
+                  animationDuration={1000}
                 />
               )}
-              <Legend />
+              <Legend 
+                iconType="circle" 
+                iconSize={10}
+                wrapperStyle={{ paddingTop: 15 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </ChartContainer>

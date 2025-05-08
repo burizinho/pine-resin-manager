@@ -101,3 +101,39 @@
   min-height: 400px;
   z-index: 1;
 }
+
+/* Chart styling improvements */
+.recharts-default-tooltip {
+  @apply border border-border/30 shadow-lg bg-background/95 backdrop-blur-sm rounded-lg !important;
+}
+
+.recharts-legend-item-text {
+  @apply text-foreground !important;
+}
+
+.recharts-cartesian-axis-line, 
+.recharts-cartesian-axis-tick-line {
+  @apply stroke-muted-foreground/50 !important;
+}
+
+.recharts-text {
+  @apply fill-muted-foreground !important;
+}
+
+/* Table improvements */
+table thead tr {
+  @apply bg-muted/40 border-b border-border/50;
+}
+
+table tbody tr:hover {
+  @apply bg-muted/30;
+}
+
+/* Card enhancements */
+.card {
+  @apply transition-shadow duration-300 hover:shadow-md;
+}
+
+.card-header {
+  @apply rounded-t-lg;
+}

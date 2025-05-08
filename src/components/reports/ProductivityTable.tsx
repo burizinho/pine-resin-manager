@@ -87,43 +87,49 @@ export default function ProductivityTable({ dateRange }: ProductivityTableProps)
   }, [dateRange]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Produtividade por Área</CardTitle>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="bg-secondary/40 rounded-t-lg">
+        <CardTitle className="text-xl">Produtividade por Área</CardTitle>
         <CardDescription>Análise detalhada de rendimento e eficiência</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="relative w-full overflow-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Área</TableHead>
-                <TableHead>Tamanho</TableHead>
-                <TableHead className="text-right">Produção (kg)</TableHead>
-                <TableHead className="text-right">kg/ha</TableHead>
-                <TableHead className="text-right">kg/árvore</TableHead>
-                <TableHead className="text-right">Eficiência</TableHead>
-                <TableHead className="text-right">Variação</TableHead>
+          <Table className="border-collapse">
+            <TableHeader className="bg-muted/30">
+              <TableRow className="border-b border-border/50 hover:bg-transparent">
+                <TableHead className="font-medium text-foreground">Área</TableHead>
+                <TableHead className="font-medium text-foreground">Tamanho</TableHead>
+                <TableHead className="text-right font-medium text-foreground">Produção (kg)</TableHead>
+                <TableHead className="text-right font-medium text-foreground">kg/ha</TableHead>
+                <TableHead className="text-right font-medium text-foreground">kg/árvore</TableHead>
+                <TableHead className="text-right font-medium text-foreground">Eficiência</TableHead>
+                <TableHead className="text-right font-medium text-foreground">Variação</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredData.map((row, i) => (
-                <TableRow key={i}>
-                  <TableCell className="font-medium">{row.area}</TableCell>
-                  <TableCell>{formatArea(row.tamanho)}</TableCell>
-                  <TableCell className="text-right">{row.producao}</TableCell>
-                  <TableCell className="text-right font-medium">{row.produtividade.toFixed(1)}</TableCell>
-                  <TableCell className="text-right">{row.produtividadeArvore.toFixed(3)}</TableCell>
-                  <TableCell className="text-right">
+                <TableRow key={i} className="hover:bg-muted/40 transition-colors">
+                  <TableCell className="font-medium border-b border-border/30">{row.area}</TableCell>
+                  <TableCell className="border-b border-border/30">{formatArea(row.tamanho)}</TableCell>
+                  <TableCell className="text-right border-b border-border/30">{row.producao}</TableCell>
+                  <TableCell className="text-right font-medium border-b border-border/30 text-primary">
+                    {row.produtividade.toFixed(1)}
+                  </TableCell>
+                  <TableCell className="text-right border-b border-border/30">
+                    {row.produtividadeArvore.toFixed(3)}
+                  </TableCell>
+                  <TableCell className="text-right border-b border-border/30">
                     <div className="flex items-center justify-end gap-2">
-                      <div 
-                        className="h-2 bg-primary rounded-full" 
-                        style={{ width: `${row.eficiencia}%`, maxWidth: '100px' }}
-                      />
-                      <span>{row.eficiencia}%</span>
+                      <div className="w-24 bg-muted/50 h-2 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary rounded-full" 
+                          style={{ width: `${row.eficiencia}%` }}
+                        />
+                      </div>
+                      <span className="font-medium min-w-12">{row.eficiencia}%</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right border-b border-border/30">
                     <div className="flex items-center justify-end gap-1">
                       {row.variacao > 0 ? (
                         <ArrowUpIcon className="h-4 w-4 text-green-600" />

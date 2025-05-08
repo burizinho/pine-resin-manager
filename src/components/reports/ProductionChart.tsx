@@ -72,18 +72,49 @@ export default function ProductionChart({ dateRange }: ProductionChartProps) {
     });
   }, [period, dateRange]);
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-background border rounded-lg p-3 shadow-md">
+          <p className="font-medium text-sm">{label}</p>
+          <div className="mt-1 space-y-1">
+            {payload.map((entry: any, index: number) => (
+              <p key={`item-${index}`} className="flex items-center gap-2">
+                <span 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: entry.color }}
+                ></span>
+                <span className="text-muted-foreground text-xs">
+                  {entry.name === 'quantidade' ? 'Produção' : 'Meta'}:
+                </span>
+                <span className="font-medium">{`${entry.value} kg`}</span>
+              </p>
+            ))}
+            <p className="text-xs text-muted-foreground mt-1 pt-1 border-t">
+              {payload[0].value > payload[1].value ? 
+                `${Math.round((payload[0].value/payload[1].value - 1) * 100)}% acima da meta` : 
+                `${Math.round((1 - payload[0].value/payload[1].value) * 100)}% abaixo da meta`
+              }
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="flex flex-row items-center justify-between bg-secondary/40 rounded-t-lg">
         <div>
-          <CardTitle>Produção por Período</CardTitle>
+          <CardTitle className="text-xl">Produção por Período</CardTitle>
           <CardDescription>Valores em kg com comparativo de metas</CardDescription>
         </div>
         <Select
           value={period}
           onValueChange={(value) => setPeriod(value as Period)}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px] border-primary/20 bg-background">
             <SelectValue placeholder="Selecione o período" />
           </SelectTrigger>
           <SelectContent>
@@ -92,29 +123,56 @@ export default function ProductionChart({ dateRange }: ProductionChartProps) {
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="h-[350px]">
+      <CardContent className="h-[350px] pt-6">
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={filteredData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="month" className="text-xs" />
-              <YAxis className="text-xs" />
-              <Tooltip 
-                formatter={(value, name) => {
-                  return [
-                    `${value} kg`, 
-                    name === 'quantidade' ? 'Quantidade' : 'Meta'
-                  ];
-                }}
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--background)',
-                }}
+            <BarChart 
+              data={filteredData} 
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              barGap={4}
+              barCategoryGap={16}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/50" vertical={false} />
+              <XAxis 
+                dataKey="month" 
+                className="text-xs"
+                axisLine={{ stroke: 'var(--muted)' }}
+                tickLine={{ stroke: 'var(--muted)' }}
+                tick={{ fill: 'var(--foreground)', fontSize: 12 }}
               />
-              <Legend formatter={(value) => value === 'quantidade' ? 'Produção real' : 'Meta de produção'} />
-              <Bar dataKey="quantidade" fill="var(--color-quantidade)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="meta" fill="var(--color-meta)" radius={[4, 4, 0, 0]} />
+              <YAxis 
+                className="text-xs" 
+                axisLine={{ stroke: 'var(--muted)' }}
+                tickLine={{ stroke: 'var(--muted)' }}
+                tick={{ fill: 'var(--foreground)', fontSize: 11 }}
+              />
+              <Tooltip 
+                content={<CustomTooltip />}
+                cursor={{ fill: 'var(--secondary)', opacity: 0.2 }}
+              />
+              <Legend 
+                formatter={(value) => value === 'quantidade' ? 'Produção real' : 'Meta de produção'}
+                iconType="circle"
+                iconSize={10}
+                wrapperStyle={{ paddingTop: 15 }}
+              />
+              <Bar 
+                dataKey="quantidade" 
+                fill="var(--color-quantidade)" 
+                radius={[4, 4, 0, 0]} 
+                animationDuration={800}
+                name="quantidade"
+                maxBarSize={50}
+              />
+              <Bar 
+                dataKey="meta" 
+                fill="var(--color-meta)" 
+                radius={[4, 4, 0, 0]} 
+                animationDuration={800}
+                animationBegin={200}
+                name="meta"
+                maxBarSize={50}
+              />
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
